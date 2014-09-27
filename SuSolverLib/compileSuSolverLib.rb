@@ -1,0 +1,3 @@
+# Todo: make this better
+`del .\\org\\dellamorte\\raum\\susolver\\supuzzle\\*.class`
+puts `mirahc -cp .;.\\org\\dellamorte\\raum\\susolver\\supuzzle .\\src\\org\\dellamorte\\raum\\susolver\\supuzzle\\Ops.mirah .\\src\\org\\dellamorte\\raum\\susolver\\supuzzle\\SuClass.mirah .\\src\\org\\dellamorte\\raum\\susolver\\supuzzle\\SuCell.mirah .\\src\\org\\dellamorte\\raum\\susolver\\supuzzle\\SuBlock.mirah .\\src\\org\\dellamorte\\raum\\susolver\\supuzzle\\SuPuzzle.mirah`

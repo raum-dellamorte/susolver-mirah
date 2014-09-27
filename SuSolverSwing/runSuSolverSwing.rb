@@ -1,0 +1,1 @@
+`java -cp .;..\\lib\\SuSolverLib.jar;\\org\\dellamorte\\raum\\susolver\\supuzzle;.\\org\\dellamorte\\raum\\mirah\\awtextra;.\\org\\dellamorte\\raum\\susolver\\swing org.dellamorte.raum.susolver.swing.SuWindow`

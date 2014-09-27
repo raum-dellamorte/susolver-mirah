@@ -1,0 +1,5 @@
+`del .\\org\\dellamorte\\raum\\mirah\\awtextra\\*.class`
+`del .\\org\\dellamorte\\raum\\susolver\\swing\\*.class`
+puts `mirahc -cp .;..\\lib\\SuSolverLib.jar;\\org\\dellamorte\\raum\\susolver\\supuzzle;.\\org\\dellamorte\\raum\\mirah\\awtextra;.\\org\\dellamorte\\raum\\susolver\\swing .\\src\\org\\dellamorte\\raum\\mirah\\awtextra\\AbsoluteConstraints.mirah .\\src\\org\\dellamorte\\raum\\mirah\\awtextra\\AbsoluteLayout.mirah .\\src\\org\\dellamorte\\raum\\susolver\\swing\\SuEntryCell.mirah .\\src\\org\\dellamorte\\raum\\susolver\\swing\\SuEntryBlock.mirah .\\src\\org\\dellamorte\\raum\\susolver\\swing\\SuEntryPuzzle.mirah .\\src\\org\\dellamorte\\raum\\susolver\\swing\\SuSolveCell.mirah .\\src\\org\\dellamorte\\raum\\susolver\\swing\\SuSolveBlock.mirah .\\src\\org\\dellamorte\\raum\\susolver\\swing\\SuSolvePuzzle.mirah .\\src\\org\\dellamorte\\raum\\susolver\\swing\\SuWindow.mirah`
+# `mirahc -N -c .;.\\org\\dellamorte\\raum\\susolver `
+# java -jar mirahc.jar
