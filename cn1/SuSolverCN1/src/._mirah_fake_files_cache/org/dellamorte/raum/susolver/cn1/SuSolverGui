@@ -98,22 +98,4 @@ class SuSolverGui
 	def buildSuEntryBox():Container
 		
 	end
-	
-	class SuEntryCell
-		def initialize():void
-			
-		end
-	end
-	
-	class SuEntryBox
-		def initialize():void
-			
-		end
-	end
-	
-	class SuEntryPuzzle
-		def initialize():void
-			
-		end
-	end
 end

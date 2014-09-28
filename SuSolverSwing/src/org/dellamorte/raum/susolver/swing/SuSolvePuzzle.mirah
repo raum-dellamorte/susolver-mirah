@@ -1,7 +1,7 @@
 package org.dellamorte.raum.susolver.swing
 
 import org.dellamorte.raum.susolver.supuzzle.*
-import org.dellamorte.raum.susolver.swing.*
+#import org.dellamorte.raum.susolver.swing.*
 
 import java.util.Arrays
 import java.util.ArrayList

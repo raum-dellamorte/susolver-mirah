@@ -1,9 +1,18 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 package org.dellamorte.raum.mirah.awtextra
-
-import org.dellamorte.raum.mirah.awtextra.AbsoluteConstraints
 import java.util.Enumeration
-import java.awt.*;
+import java.awt.*
 
+
+/**
+ *
+ * @author Raum
+ */
 class AbsoluteLayout implements LayoutManager2 #, java.io.Serializable
 	def initialize()
 		super

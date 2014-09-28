@@ -1,7 +1,13 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 package org.dellamorte.raum.susolver.swing
 
 import org.dellamorte.raum.susolver.supuzzle.*
-import org.dellamorte.raum.susolver.swing.*
+#import org.dellamorte.raum.susolver.swing.*
 import org.dellamorte.raum.mirah.awtextra.AbsoluteConstraints
 import org.dellamorte.raum.mirah.awtextra.AbsoluteLayout
 
@@ -22,7 +28,10 @@ import java.awt.*
 import java.awt.event.*
 import javax.swing.*
 
-
+/**
+ *
+ * @author Raum
+ */
 class SuWindow
 #	class CloseAct implements WindowListener
 #		def initialize():void; end
@@ -397,3 +406,4 @@ class SuWindow
 	end
 	
 end
+
