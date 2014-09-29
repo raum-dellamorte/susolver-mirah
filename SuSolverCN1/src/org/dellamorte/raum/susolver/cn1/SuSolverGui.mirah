@@ -10,6 +10,10 @@ import com.codename1.ui.Container
 import com.codename1.ui.layouts.BoxLayout
 import com.codename1.ui.Button
 import com.codename1.ui.layouts.GridLayout
+import com.codename1.ui.geom.Dimension
+import com.codename1.ui.layouts.FlowLayout
+import com.codename1.ui.Component
+import com.codename1.ui.events.ActionEvent
 import java.io.IOException
 
 class SuSolverGui 
@@ -38,7 +42,7 @@ class SuSolverGui
 	 * We use this method to calculate a "fake" DPI based on screen resolution rather than its actual DPI
 	 * this is useful so we can have large images on a tablet
 	 */
-	def calculateDPI
+	def self.calculateDPI
 			pixels = Display.getInstance.getDisplayHeight * Display.getInstance.getDisplayWidth
 			if pixels > 1000000
 					Display.DENSITY_HD
@@ -49,6 +53,42 @@ class SuSolverGui
 			else
 					Display.DENSITY_MEDIUM
 			end
+	end
+	
+	def self.puzMaxWH():int
+		w = Display.getInstance.getDisplayWidth
+		h = Display.getInstance.getDisplayHeight
+		if w < h
+			w - 90
+		else
+			h - 90
+		end 
+	end
+	/*
+	def self.switchBtnW():int
+		w = Display.getInstance.getDisplayWidth
+		h = Display.getInstance.getDisplayHeight
+		if w > h
+			((w - h) - 60)
+		else
+			((h - w) - 60)
+		end 
+	end
+	*/
+	def self.cellCanBe(cel:int, n:int):boolean
+		return true if n == 0
+		out = true
+		tc = @@puzE[cel]
+		81.times do |i:int|
+			next if cel == i
+			next unless out
+			c = @@puzE[i]
+			next unless (((c.box() == tc.box()) or (c.row() == tc.row())) or (c.col() == tc.col()))
+			next if c.val() == 0
+			next if c.val() != n
+			out = false
+		end
+		out
 	end
 	
 	def start():void
@@ -67,35 +107,56 @@ class SuSolverGui
 	end
 	
 	def init():void
-		@suEntry = buildSuEntryPuzzle()
-		#@suSolve = buildSuSolvePuzzle()
-		@suEntry.show()
+		@@suEntry = buildSuEntryPuzzle()
+		#@@suSolve = buildSuSolvePuzzle()
+		@@suEntry.show()
 	end
 	
 	def buildSuEntryPuzzle():Form
-		@puzE = Button[81]
-		@puzC = Container.new(GridLayout.new(3,3))
-		se = Form.new("SuSolver")
+		sz = SuSolverGui.puzMaxWH()
+		@@puzE = SuEntryCell[81]
+		threeby3 = GridLayout.new(3,3)
+		@@puzC = Container.new(threeby3)
+		@@puzC.setPreferredSize(Dimension.new(sz,sz))
+		se = Form.new() # "SuSolver"
 		3.times do |brw:int|
 			3.times do |bcl:int|
-				bx = Container.new(GridLayout.new(3,3))
+				bx = Container.new(threeby3)
+				isz = int(sz / 3) - 12
+				bx.setPreferredSize(Dimension.new(isz,isz))
+				bx.getStyle().setMargin(2, 2, 2, 2)
 				3.times do |crw:int|
 					3.times do |ccl:int|
 						loc = ((((brw * 27) + (crw * 9)) + (bcl * 3)) + ccl)
-						locrw = ((brw * 3) + crw) + 1
-						cel = Button.new("0")
-						@puzE[loc] = cel
+						cel = SuEntryCell.new().setLoc(loc)
+						@@puzE[loc] = cel
 						bx.addComponent(cel)
 					end
 				end
-				@puzC.addComponent(bx)
+				@@puzC.addComponent(bx)
 			end
 		end
-		se.addComponent(@puzC)
+		boxl = Container.new(BoxLayout.new(BoxLayout.Y_AXIS))
+		@@toSolver = Button.new("To Solver ->")
+		@@toSolver.addActionListener do |e:ActionEvent|
+			
+		end
+		@@toSolver.setPreferredW(sz - 40) #(SuSolverGui.switchBtnW())
+		@@toSolver.setPreferredH(30)
+		boxl.addComponent(@@puzC)
+		boxl.addComponent(@@toSolver)
+		#se.addComponent(@@toSolver)
+		#se.addComponent(@@puzC)
+		flow = FlowLayout.new(Component.CENTER)
+		se.setLayout(flow)
+		se.addOrientationListener do |e:ActionEvent|
+			
+		end
+		se.addComponent(boxl)
 		return se
 	end
 	
-	def buildSuEntryBox():Container
+	def buildSuSolvePuzzle():Form
 		
 	end
 end
