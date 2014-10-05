@@ -1,5 +1,6 @@
 package org.dellamorte.raum.susolver.cn1
 
+import org.dellamorte.raum.susolver.supuzzle.*
 
 import com.codename1.ui.Display
 import com.codename1.ui.Form
@@ -64,16 +65,28 @@ class SuSolverGui
 			h - 90
 		end 
 	end
-	/*
-	def self.switchBtnW():int
-		w = Display.getInstance.getDisplayWidth
-		h = Display.getInstance.getDisplayHeight
-		if w > h
-			((w - h) - 60)
-		else
-			((h - w) - 60)
-		end 
+	
+	def self.updateBoard():void
+		@@puzzle = SuPuzzle.new(3)
+		board = int[81]
+		81.times do |i:int|
+			n = @@puzE[i].val()
+			board[i] = n
+		end
+		@@puzzle.setCells(board)
+		81.times do |c:int|
+			@@puzS[c].set(@@puzzle.cells[c])
+			@@puzS[c].setClue(true) unless (@@puzzle.cells[c].val() == 0)
+		end
 	end
+	
+	/**
+	* SuSolverGui.cellCanBe(cel:int, n:int):boolean
+	* cel - int from 0 to 80 referencing a Sudoku cell.
+	* n   - int from 1 to 9 to check against all cells in the same block, row, or column.
+	* Returns True if:
+	*		- n == 0
+	*		- no other cells in same block, row, or column have the value n.
 	*/
 	def self.cellCanBe(cel:int, n:int):boolean
 		return true if n == 0
@@ -108,55 +121,104 @@ class SuSolverGui
 	
 	def init():void
 		@@suEntry = buildSuEntryPuzzle()
-		#@@suSolve = buildSuSolvePuzzle()
+		@@suSolve = buildSuSolvePuzzle()
+		#@@suSolve.setTransitionInAnimator(@@suEntry.getTransitionInAnimator.copy(true))
+		#@@suSolve.setTransitionOutAnimator(@@suEntry.getTransitionOutAnimator.copy(true))
+		toEntry()
+	end
+	
+	def self.toEntry():void
 		@@suEntry.show()
+	end
+	
+	def self.toSolve():void
+		SuSolverGui.updateBoard()
+		@@suSolve.show()
 	end
 	
 	def buildSuEntryPuzzle():Form
 		sz = SuSolverGui.puzMaxWH()
 		@@puzE = SuEntryCell[81]
-		threeby3 = GridLayout.new(3,3)
-		@@puzC = Container.new(threeby3)
-		@@puzC.setPreferredSize(Dimension.new(sz,sz))
+		g3x3 = GridLayout.new(3,3)
+		@@eGrid = Container.new(g3x3)
+		@@eGrid.setPreferredSize(Dimension.new(sz,sz))
 		se = Form.new() # "SuSolver"
 		3.times do |brw:int|
 			3.times do |bcl:int|
-				bx = Container.new(threeby3)
-				isz = int(sz / 3) - 12
-				bx.setPreferredSize(Dimension.new(isz,isz))
+				bx = Container.new(g3x3)
+				bsz = int(sz / 3) - 12
+				bx.setPreferredSize(Dimension.new(bsz,bsz))
 				bx.getStyle().setMargin(2, 2, 2, 2)
 				3.times do |crw:int|
 					3.times do |ccl:int|
 						loc = ((((brw * 27) + (crw * 9)) + (bcl * 3)) + ccl)
-						cel = SuEntryCell.new().setLoc(loc)
+						csz = int(bsz / 3)
+						(csz -= 6) if (csz > 15)
+						cel = SuEntryCell.build(loc, csz)
 						@@puzE[loc] = cel
 						bx.addComponent(cel)
 					end
 				end
-				@@puzC.addComponent(bx)
+				@@eGrid.addComponent(bx)
 			end
 		end
 		boxl = Container.new(BoxLayout.new(BoxLayout.Y_AXIS))
 		@@toSolver = Button.new("To Solver ->")
 		@@toSolver.addActionListener do |e:ActionEvent|
-			
+			SuSolverGui.toSolve()
 		end
 		@@toSolver.setPreferredW(sz - 40) #(SuSolverGui.switchBtnW())
 		@@toSolver.setPreferredH(30)
-		boxl.addComponent(@@puzC)
+		boxl.addComponent(@@eGrid)
 		boxl.addComponent(@@toSolver)
-		#se.addComponent(@@toSolver)
-		#se.addComponent(@@puzC)
 		flow = FlowLayout.new(Component.CENTER)
 		se.setLayout(flow)
-		se.addOrientationListener do |e:ActionEvent|
-			
-		end
+		/*se.addOrientationListener do |e:ActionEvent|; ;end*/
 		se.addComponent(boxl)
 		return se
 	end
 	
 	def buildSuSolvePuzzle():Form
-		
+		sz = SuSolverGui.puzMaxWH()
+		@@puzS = SuSolveCell[81]
+		g3x3 = GridLayout.new(3,3)
+		@@sGrid = Container.new(g3x3)
+		@@sGrid.setPreferredSize(Dimension.new(sz,sz))
+		se = Form.new() # "SuSolver"
+		3.times do |brw:int|
+			3.times do |bcl:int|
+				bx = Container.new(g3x3)
+				bsz = int(sz / 3) - 12
+				bx.setPreferredSize(Dimension.new(bsz,bsz))
+				bxStl = bx.getStyle()
+				bxStl.setMargin(1, 1, 1, 1)
+				bxStl.setPadding(0, 0, 0, 0)
+				3.times do |crw:int|
+					3.times do |ccl:int|
+						loc = ((((brw * 27) + (crw * 9)) + (bcl * 3)) + ccl)
+						csz = (bsz / 3)
+						#(csz -= 6) if (csz > 15)
+						cel = SuSolveCell.build(loc, csz)
+						@@puzS[loc] = cel
+						bx.addComponent(cel)
+					end
+				end
+				@@sGrid.addComponent(bx)
+			end
+		end
+		boxl = Container.new(BoxLayout.new(BoxLayout.Y_AXIS))
+		@@toEntry = Button.new("<- To Puzzle Entry")
+		@@toEntry.addActionListener do |e:ActionEvent|
+			SuSolverGui.toEntry()
+		end
+		@@toEntry.setPreferredW(sz - 40) #(SuSolverGui.switchBtnW())
+		@@toEntry.setPreferredH(30)
+		boxl.addComponent(@@sGrid)
+		boxl.addComponent(@@toEntry)
+		flow = FlowLayout.new(Component.CENTER)
+		se.setLayout(flow)
+		/*se.addOrientationListener do |e:ActionEvent|; ;end*/
+		se.addComponent(boxl)
+		return se
 	end
 end

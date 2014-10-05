@@ -1,171 +1,121 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.dellamorte.raum.susolver.cn1
 
-import org.dellamorte.raum.susolver.supuzzle.*
 import org.dellamorte.raum.susolver.cn1.*
+import org.dellamorte.raum.susolver.supuzzle.*
 
-import com.codename1.ui.Graphics
-#import com.codename1.ui.Button
-import com.codename1.ui.Component
-import com.codename1.ui.Container
-#import com.codename1.ui.Dialog
-import com.codename1.ui.Display
-import com.codename1.ui.Form
-#import com.codename1.ui.Image
-import com.codename1.ui.Label
-#import com.codename1.ui.TextArea
-#import com.codename1.ui.animations.CommonTransitions
-#import com.codename1.ui.events.ActionEvent
-#import com.codename1.ui.events.ActionListener
-import com.codename1.ui.geom.Dimension
-#import com.codename1.ui.layouts.BorderLayout
-#import com.codename1.ui.layouts.BoxLayout
-#import com.codename1.ui.layouts.FlowLayout
-#import com.codename1.ui.layouts.GridLayout
-#import com.codename1.ui.layouts.LayeredLayout
-#import com.codename1.ui.plaf.UIManager
-#import com.codename1.ui.util.Resources
-#import com.codename1.ui.util.UITimer
-import java.io.IOException
-import java.util.ArrayList
 import java.util.Arrays
-import java.util.Collections
-import java.util.List
+import com.codename1.ui.Button
+import com.codename1.ui.geom.Dimension
+import com.codename1.ui.events.ActionEvent
+import com.codename1.ui.Font
+import com.codename1.ui.Display
+import com.codename1.ui.Component
+import com.codename1.ui.layouts.LayeredLayout
+import com.codename1.ui.Container
+import com.codename1.ui.layouts.GridLayout
+import com.codename1.ui.layouts.FlowLayout
+import com.codename1.ui.Label
+import com.codename1.ui.layouts.BoxLayout
+import com.codename1.ui.Graphics
+import com.codename1.ui.Transform
+import com.codename1.util.MathUtil
+import com.codename1.ui.Image
+import java.util.ArrayList
 
 /**
  *
  * @author Raum
  */
 class SuSolveCell < Component
-	$Override
-	def paint(g:Graphics):void
+	/*def self.setSuPuzzle():void
 		
 	end
 	
+	def self.suPuzzle():SuPuzzle
+		
+	end*/
+	
+	def self.build(loc:int, sz:int):SuSolveCell
+		cel = SuSolveCell.new()
+		cel.setLoc(loc)
+		cel.setCellSize(sz)
+		cel.setClue(false)
+		cel
+	end
+	
+	$Override
 	def initialize():void
-		super
-		@suCell = SuCell(nil)
-		@cel = 0
-		@box = 0
-		@irow = 0
-		@icol = 0
+		super()
+		@style = getStyle()
+		@style.setMargin(0, 0, 0, 0)
+		@style.setPadding(0, 0, 0, 0)
+	end
+	
+	def setCellSize(syze:int):void
+		@sz = syze
+		setPreferredSize(Dimension.new(@sz,@sz))
+		setSize(Dimension.new(@sz,@sz))
+	end
+	
+	def setClue(isClue:boolean):void
+		@clue = isClue
+	end
+	
+	def setLoc(loc:int):void
+		@loc = loc
+		calcBRC()
+	end
+	
+	def loc():int
+		@loc
+	end
+	
+	/*def setVal(n:int, doRepaint = true, isClue = false):void
+		@val = n
+		setClue(true) if isClue
+		repaint() if doRepaint
+	end*/
+	
+	def valS():String
+		return ("" + val()) unless val() == 0
+		return "_"
+	end
+	
+	def calcBRC():void
+		l = (@loc + 1)
+		@col = l % 9
+		@col = 9 if (@col == 0)
+		@row = 0
+		(@row += 1; l -= 9) until (l < 1)
+		r = @row
+		c = @col
 		@brow = 0
 		@bcol = 0
-		
-		#setFocusable(false)
-		#setMaximumSize(java::awt::Dimension.new(30, 30))
-		#setMinimumSize(java::awt::Dimension.new(30, 30))
-		#setLayout(javax::swing::OverlayLayout.new(self))
-		
-		@pMarksPanel = Container.new()
-		@valPanel = Container.new()
-		@valLbl = Container.new()
-		
-		@pMarkLbls = Label[9]
-		9.times do |i|
-			l = Label.new()
-			#l.setFont() #(java::awt::Font.new("Courier New", 0, 8))
-			#l.setHorizontalAlignment(javax::swing::SwingConstants.CENTER)
-			#l.setText("" + (i + 1))
-			#l.setAlignmentX(float(0.5))
-			#l.setMaximumSize(java::awt::Dimension.new(10, 10))
-			#l.setMinimumSize(java::awt::Dimension.new(10, 10))
-			#l.setPreferredSize(java::awt::Dimension.new(10, 10))
-			@pMarkLbls[i] = l
-		end
-		
-		#@pMarksPanel.setLayout(AbsoluteLayout.new())
-		
-		#@pMarksPanel.add(@pMarkLbls[0], AbsoluteConstraints.new(0, 0, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[1], AbsoluteConstraints.new(10, 0, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[2], AbsoluteConstraints.new(20, 0, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[3], AbsoluteConstraints.new(0, 10, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[4], AbsoluteConstraints.new(10, 10, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[5], AbsoluteConstraints.new(20, 10, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[6], AbsoluteConstraints.new(0, 20, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[7], AbsoluteConstraints.new(10, 20, -1, -1))
-		#@pMarksPanel.add(@pMarkLbls[8], AbsoluteConstraints.new(20, 20, -1, -1))
-		
-		#add(@pMarksPanel)
-		
-		#@valPanel.setAlignmentX(float(0.0))
-		#@valPanel.setAlignmentY(float(0.0))
-		#@valPanel.setMaximumSize(java::awt::Dimension.new(30, 30))
-		#@valPanel.setMinimumSize(java::awt::Dimension.new(30, 30))
-		#@valPanel.setPreferredSize(java::awt::Dimension.new(30, 30))
-		#@valPanel.setLayout(AbsoluteLayout.new())
-		
-		#@valLbl.setFont(java::awt::Font.new("Courier New", 1, 24))
-		#@valLbl.setHorizontalAlignment(javax::swing::SwingConstants.CENTER)
-		#@valLbl.setText("0")
-		#@valLbl.setAlignmentY(float(0.0))
-		#@valLbl.setFocusable(false)
-		#@valLbl.setIconTextGap(0)
-		#@valLbl.setMaximumSize(java::awt::Dimension.new(30, 30))
-		#@valLbl.setMinimumSize(java::awt::Dimension.new(30, 30))
-		#@valLbl.setPreferredSize(java::awt::Dimension.new(30, 30))
-		#@valLbl.setRequestFocusEnabled(false)
-		#@valLbl.setVerifyInputWhenFocusTarget(false)
-		#@valPanel.add(@valLbl, AbsoluteConstraints.new(0, 0, -1, -1))
-		
-		#add(@valPanel)
-		@counter = 0
-	end
-	
-	def setCellNum(v:int):void
-		@cel = v
-		v = v + 1 until ((v % 3) == 0)
-		@irow = v / 3
-		@icol = @cel - (3 * (@irow - 1))
-	end
-	
-	def setBoxNum(v:int):void
-		return if ((v < 1) or (v > 9))
-		@box = v
-		v = v + 1 until ((v % 3) == 0)
-		@brow = v / 3
-		@bcol = @box - (3 * (@brow - 1))
-	end
-	
-	def irow():int
-		@irow
-	end
-	
-	def icol():int
-		@icol
-	end
-	
-	def brow():int
-		@brow
-	end
-	
-	def bcol():int
-		@bcol
+		(@brow += 1; c -= 3) until (c < 1)
+		(@bcol += 1; r -= 3) until (r < 1)
+		@box = (((@brow - 1) * 3) + @bcol)
 	end
 	
 	def row():int
-		return 0 if (((@cel == 0) or (@box == 0)) or (@brow <= 0))
-		(3 * (@brow - 1)) + irow()
+		@row
 	end
 	
 	def col():int
-		return 0 if (((@cel == 0) or (@box == 0)) or (@bcol <= 0))
-		(3 * (@bcol - 1)) + icol()
+		@col
+	end
+	
+	def box():int
+		@box
 	end
 	
 	def set(cel:SuCell):void
 		@suCell = cel
-		updateLbls()
+		repaint()
 	end
 	
 	def reset():void
 		@suCell = SuCell(nil)
-		updateLbls()
+		repaint()
 	end
 	
 	def val():int
@@ -188,27 +138,84 @@ class SuSolveCell < Component
 		end
 	end
 	
-	def updateLbls():void
-		@counter = @counter + 1
-		if @counter == 500
-			@counter = 0
-			puts "" + row() + "" + col() + " " + @suCell
-			puts @suCell.to_s unless @suCell == nil
-		end
-		if val() == 0
-			#@valLbl.setText("")
-			@valLbl.setVisible(false)
-			@pMarksPanel.setVisible(true)
-			9.times do |i|
-				@pMarkLbls[i].setVisible(Ops.contains?(pMarks(), i + 1))
+	def canBe(n:int):boolean
+		return !@suCell.eliminated?(n) unless (@suCell == nil)
+		return true
+	end
+	
+	def pickFont():Font
+		syze = SuSolverGui.calculateDPI
+		if Font.isTrueTypeFileSupported()
+			pmf = Font.createTrueTypeFont("Courier New Bold", "cnewbold.ttf")
+			pmf.derive(@fontSz, Font.STYLE_BOLD) # @fontSz
+		elsif (val() == 0)
+			if syze == Display.DENSITY_HD
+				Font.getBitmapFont("PMarksHD")
+			elsif syze == Display.DENSITY_VERY_HIGH
+				Font.getBitmapFont("PMarksVH")
+			elsif syze == Display.DENSITY_HIGH
+				Font.getBitmapFont("PMarksH")
+			else
+				Font.getBitmapFont("PMarks")
 			end
 		else
-			#@valLbl.setText("" + val())
-			@pMarksPanel.setVisible(false)
-			@valLbl.setVisible(true)
+			if syze == Display.DENSITY_HD
+				Font.getBitmapFont("SuEntryHD")
+			elsif syze == Display.DENSITY_VERY_HIGH
+				Font.getBitmapFont("SuEntryVH")
+			elsif syze == Display.DENSITY_HIGH
+				Font.getBitmapFont("SuEntryH")
+			else
+				Font.getBitmapFont("SuEntry")
+			end
 		end
-		#revalidate()
-		repaint()
+	end
+	
+	def bgcolor():int
+		return 15527148 if @clue # ECECEC
+		return 14474460 # DCDCDC
+	end
+	
+	def fgcolor():int
+		return 3937300 if @clue # 3C1414
+		return 1315860 # 141414
+	end
+	
+	$Override
+	def paint(g:Graphics):void
+		super(g)
+		x = getX(); y = getY() #; w = getWidth(); h = getHeight()
+		g.setColor(0) # border
+		g.drawRect(x, y, @sz, @sz)
+		g.setColor(bgcolor())
+		g.fillRect(x, y, @sz - 2, @sz - 2)
+		g.setColor(fgcolor())
+		if (val() == 0)
+			inc = ((@sz / 3) - ((@sz * 5) / 100))
+			brdr = ((@sz - (inc * 3)) / 2)
+			@fontSz = ((inc * 90) / 100)
+			g.setFont(pickFont())
+			3.times do |r:int|
+				3.times do |c:int|
+					n = (((r * 3) + c) + 1)
+					if canBe(n)
+						s = ("" + n)
+					else
+						s = " "
+					end
+					ix = (((c * inc) + (brdr + (@fontSz / 4))) + x)
+					iy = (((r * inc) + brdr) + y)
+					g.drawString(s, ix, iy)
+				end
+			end
+		else
+			@fontSz = ((@sz * 90) / 100)
+			brdr = ((@sz - @fontSz) / 4)
+			g.setFont(pickFont())
+			ix = ((brdr + x) + (@fontSz / 4))
+			iy = (brdr + y)
+			g.drawString(valS(), ix, iy)
+		end
 	end
 end
 

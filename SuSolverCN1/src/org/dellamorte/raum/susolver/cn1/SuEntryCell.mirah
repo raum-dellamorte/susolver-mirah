@@ -1,8 +1,6 @@
 package org.dellamorte.raum.susolver.cn1
 
 import org.dellamorte.raum.susolver.cn1.*
-#import org.dellamorte.raum.mirah.awtextra.AbsoluteConstraints
-#import org.dellamorte.raum.mirah.awtextra.AbsoluteLayout
 
 import java.util.Arrays
 import com.codename1.ui.Button
@@ -17,24 +15,40 @@ import java.util.ArrayList
  * @author Raum
  */
 class SuEntryCell < Button
+	def self.build(loc:int, sz:int):SuEntryCell
+		
+		cel = SuEntryCell.new()
+		cel.setLoc(loc)
+		cel.setCellSize(sz)
+		cel
+	end
+	
+	$Override
 	def initialize():void
 		super()
-		setPreferredSize(Dimension.new(30,30))
+		#setPreferredSize(Dimension.new(30,30))
 		setGap(0)
 		setVal(0)
 		@style = getStyle()
-		@style.setFont(pickFont())
 		@style.setMargin(0, 0, 0, 0)
 		@style.setPadding(0, 0, 0, 0)
 	end
 	
+	def setCellSize(syze:int):void
+		@sz = syze
+		@style.setFont(pickFont())
+	end
+	
 	def pickFont():Font
-		sz = SuSolverGui.calculateDPI
-		if sz == Display.DENSITY_HD
+		syze = SuSolverGui.calculateDPI
+		if Font.isTrueTypeFileSupported()
+			pmf = Font.createTrueTypeFont("Courier New Bold", "cnewbold.ttf")
+			pmf.derive((0 + ((@sz * 4) / 5)), Font.STYLE_BOLD) # 
+		elsif syze == Display.DENSITY_HD
 			Font.getBitmapFont("SuEntryHD")
-		elsif sz == Display.DENSITY_VERY_HIGH
+		elsif syze == Display.DENSITY_VERY_HIGH
 			Font.getBitmapFont("SuEntryVH")
-		elsif sz == Display.DENSITY_HIGH
+		elsif syze == Display.DENSITY_HIGH
 			Font.getBitmapFont("SuEntryH")
 		else
 			Font.getBitmapFont("SuEntry")
