@@ -186,9 +186,9 @@ class SuSolveCell < Component
 		super(g)
 		x = getX(); y = getY() #; w = getWidth(); h = getHeight()
 		g.setColor(0) # border
-		g.drawRect(x, y, @sz, @sz)
+		g.drawRect(x + 1, y + 1, @sz, @sz)
 		g.setColor(bgcolor())
-		g.fillRect(x, y, @sz - 2, @sz - 2)
+		g.fillRect(x + 2, y + 2, @sz - 2, @sz - 2)
 		g.setColor(fgcolor())
 		if (val() == 0)
 			inc = ((@sz / 3) - ((@sz * 5) / 100))
@@ -203,8 +203,8 @@ class SuSolveCell < Component
 					else
 						s = " "
 					end
-					ix = (((c * inc) + (brdr + (@fontSz / 4))) + x)
-					iy = (((r * inc) + brdr) + y)
+					ix = ((((c * inc) + (brdr + (@fontSz / 4))) + x) + 2)
+					iy = ((((r * inc) + brdr) + y) + 2)
 					g.drawString(s, ix, iy)
 				end
 			end

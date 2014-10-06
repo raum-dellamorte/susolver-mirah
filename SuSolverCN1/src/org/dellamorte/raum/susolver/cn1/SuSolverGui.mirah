@@ -153,7 +153,7 @@ class SuSolverGui
 					3.times do |ccl:int|
 						loc = ((((brw * 27) + (crw * 9)) + (bcl * 3)) + ccl)
 						csz = int(bsz / 3)
-						(csz -= 6) if (csz > 15)
+						#(csz -= 4) if (csz > 15)
 						cel = SuEntryCell.build(loc, csz)
 						@@puzE[loc] = cel
 						bx.addComponent(cel)
