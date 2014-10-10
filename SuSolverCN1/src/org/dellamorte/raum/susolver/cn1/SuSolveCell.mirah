@@ -146,8 +146,7 @@ class SuSolveCell < Component
 	def pickFont():Font
 		syze = SuSolverGui.calculateDPI
 		if Font.isTrueTypeFileSupported()
-			pmf = Font.createTrueTypeFont("Courier New Bold", "cnewbold.ttf")
-			pmf.derive(@fontSz, Font.STYLE_BOLD) # @fontSz
+			SuSolverGui.font(@fontSz)
 		elsif (val() == 0)
 			if syze == Display.DENSITY_HD
 				Font.getBitmapFont("PMarksHD")
@@ -184,15 +183,19 @@ class SuSolveCell < Component
 	$Override
 	def paint(g:Graphics):void
 		super(g)
+		# Where, in (x,y) space, are we?
 		x = getX(); y = getY() #; w = getWidth(); h = getHeight()
-		g.setColor(0) # border
-		g.drawRect(x + 1, y + 1, @sz, @sz)
+		# Draw the border.
+		g.setColor(0) # 0 for a black border
+		g.drawRect(x + 1, y + 1, @sz, @sz) # the + 1 is from experimenting till it looked right.
+		# Fill it with the background color.
 		g.setColor(bgcolor())
 		g.fillRect(x + 2, y + 2, @sz - 2, @sz - 2)
+		# Draw the Pencil Marks 3x3 or the solution if it exists.
 		g.setColor(fgcolor())
 		if (val() == 0)
-			inc = ((@sz / 3) - ((@sz * 5) / 100))
-			brdr = ((@sz - (inc * 3)) / 2)
+			inc = ((@sz * 28) / 100) 
+			brdr = ((@sz * 8) / 100) # ((@sz - (inc * 3)) / 2)
 			@fontSz = ((inc * 90) / 100)
 			g.setFont(pickFont())
 			3.times do |r:int|

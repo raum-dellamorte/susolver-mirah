@@ -42,8 +42,7 @@ class SuEntryCell < Button
 	def pickFont():Font
 		syze = SuSolverGui.calculateDPI
 		if Font.isTrueTypeFileSupported()
-			pmf = Font.createTrueTypeFont("Courier New Bold", "cnewbold.ttf")
-			pmf.derive((0 + ((@sz * 4) / 5)), Font.STYLE_BOLD) # 
+			SuSolverGui.font(0 + ((@sz * 4) / 5))
 		elsif syze == Display.DENSITY_HD
 			Font.getBitmapFont("SuEntryHD")
 		elsif syze == Display.DENSITY_VERY_HIGH

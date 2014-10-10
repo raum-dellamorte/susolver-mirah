@@ -15,28 +15,24 @@ import com.codename1.ui.geom.Dimension
 import com.codename1.ui.layouts.FlowLayout
 import com.codename1.ui.Component
 import com.codename1.ui.events.ActionEvent
+import com.codename1.ui.Font
 import java.io.IOException
 
 class SuSolverGui 
 	attr_accessor current:Form
 	
+	def self.classInit():void
+		@@theFont = Font.createTrueTypeFont("Fantasque Sans Mono", "FantasqueSansMono-Bold.ttf")
+	end
+	
 	def init(context:Object):void
-			begin
-					theme = Resources(Resources.openLayered("/theme"))
-					UIManager.getInstance().setThemeProps(theme.getTheme(theme.getThemeResourceNames()[0]));
-			rescue IOException => e
-					e.printStackTrace()
-			end
-			# Pro users - uncomment this code to get crash reports sent to you automatically
-			/*Display.getInstance().addEdtErrorHandler ActionListener.new() do |evt:ActionEvent|
-					evt.consume()
-					Log.p("Exception in AppName version " + Display.getInstance().getProperty("AppVersion", "Unknown"))
-					Log.p("OS " + Display.getInstance().getPlatformName())
-					Log.p("Error " + evt.getSource())
-					Log.p("Current Form " + Display.getInstance().getCurrent().getName())
-					Log.e( Throwable(evt.getSource()) )
-					Log.sendLog()
-			end*/
+		SuSolverGui.classInit()
+		begin
+			theme = Resources(Resources.openLayered("/theme"))
+			UIManager.getInstance().setThemeProps(theme.getTheme(theme.getThemeResourceNames()[0]))
+		rescue IOException => e
+			e.printStackTrace()
+		end
 	end
 	
 	/**
@@ -44,16 +40,16 @@ class SuSolverGui
 	 * this is useful so we can have large images on a tablet
 	 */
 	def self.calculateDPI
-			pixels = Display.getInstance.getDisplayHeight * Display.getInstance.getDisplayWidth
-			if pixels > 1000000
-					Display.DENSITY_HD
-			elsif pixels > 340000
-					Display.DENSITY_VERY_HIGH
-			elsif pixels > 150000
-					Display.DENSITY_HIGH
-			else
-					Display.DENSITY_MEDIUM
-			end
+		pixels = Display.getInstance.getDisplayHeight * Display.getInstance.getDisplayWidth
+		if pixels > 1000000
+			Display.DENSITY_HD
+		elsif pixels > 340000
+			Display.DENSITY_VERY_HIGH
+		elsif pixels > 150000
+			Display.DENSITY_HIGH
+		else
+			Display.DENSITY_MEDIUM
+		end
 	end
 	
 	def self.puzMaxWH():int
@@ -63,6 +59,26 @@ class SuSolverGui
 			w - 90
 		else
 			h - 90
+		end 
+	end
+	
+	def self.sideRoom():int
+		w = Display.getInstance.getDisplayWidth
+		h = Display.getInstance.getDisplayHeight
+		if w < h
+			(((h - 90) - SuSolverGui.puzMaxWH()) / 2)
+		else
+			(((w - 90) - SuSolverGui.puzMaxWH()) / 2)
+		end 
+	end
+	
+	def self.isWide():boolean
+		w = Display.getInstance.getDisplayWidth
+		h = Display.getInstance.getDisplayHeight
+		if w > h
+			true
+		else
+			false
 		end 
 	end
 	
@@ -78,6 +94,36 @@ class SuSolverGui
 			@@puzS[c].set(@@puzzle.cells[c])
 			@@puzS[c].setClue(true) unless (@@puzzle.cells[c].val() == 0)
 		end
+	end
+	
+	def self.doButton(str:String):void
+		@@puzzle.setGuessMode(false)
+		if str.equals("Reset")
+			SuSolverGui.updateBoard()
+		elsif str.equals("Show Log")
+			
+			puts "Show Log Clicked"
+		elsif str.equals("Solve!")
+			@@puzzle.solve()
+		elsif str.equals("Next Step ->")
+			@@puzzle.stepCheck()
+		end
+		@@suSolve.revalidate() unless @@suSolve == nil
+	end
+	
+	def self.reorient():void
+		if SuSolverGui.isWide()
+			newW = SuSolverGui.sideRoom()
+			newH = (SuSolverGui.puzMaxWH() / 2)
+		else
+			newW = SuSolverGui.puzMaxWH()
+			newH = (SuSolverGui.sideRoom() / 2)
+		end
+		@@solve.setPreferredW(newW).setPreferredH(newH)
+		@@nextstep.setPreferredW(newW).setPreferredH(newH)
+		@@reset.setPreferredW(newW).setPreferredH(newH)
+		@@showlog.setPreferredW(newW).setPreferredH(newH)
+		@@suSolve.revalidate() unless @@suSolve == nil
 	end
 	
 	/**
@@ -120,6 +166,7 @@ class SuSolverGui
 	end
 	
 	def init():void
+		@@formFontSz = ((SuSolverGui.puzMaxWH() * 6) / 100)
 		@@suEntry = buildSuEntryPuzzle()
 		@@suSolve = buildSuSolvePuzzle()
 		#@@suSolve.setTransitionInAnimator(@@suEntry.getTransitionInAnimator.copy(true))
@@ -164,6 +211,7 @@ class SuSolverGui
 		end
 		boxl = Container.new(BoxLayout.new(BoxLayout.Y_AXIS))
 		@@toSolver = Button.new("To Solver ->")
+		@@toSolver.getStyle().setFont(SuSolverGui.font(@@formFontSz))
 		@@toSolver.addActionListener do |e:ActionEvent|
 			SuSolverGui.toSolve()
 		end
@@ -175,6 +223,7 @@ class SuSolverGui
 		se.setLayout(flow)
 		/*se.addOrientationListener do |e:ActionEvent|; ;end*/
 		se.addComponent(boxl)
+		se.getStyle().setFont(SuSolverGui.font(@@formFontSz))
 		return se
 	end
 	
@@ -208,6 +257,7 @@ class SuSolverGui
 		end
 		boxl = Container.new(BoxLayout.new(BoxLayout.Y_AXIS))
 		@@toEntry = Button.new("<- To Puzzle Entry")
+		@@toEntry.getStyle().setFont(SuSolverGui.font(@@formFontSz))
 		@@toEntry.addActionListener do |e:ActionEvent|
 			SuSolverGui.toEntry()
 		end
@@ -218,7 +268,53 @@ class SuSolverGui
 		flow = FlowLayout.new(Component.CENTER)
 		se.setLayout(flow)
 		/*se.addOrientationListener do |e:ActionEvent|; ;end*/
+		@@lbtns = Container.new(BoxLayout.new(BoxLayout.Y_AXIS))
+		@@rbtns = Container.new(BoxLayout.new(BoxLayout.Y_AXIS))
+		@@reset = Button.new("Reset")
+		@@reset.getStyle().setFont(SuSolverGui.font(@@formFontSz)) # These font assignments can be removed by subclassing Button
+		@@showlog = Button.new("Show Log")
+		@@showlog.getStyle().setFont(SuSolverGui.font(@@formFontSz))
+		@@solve = Button.new("Solve!")
+		@@solve.getStyle().setFont(SuSolverGui.font(@@formFontSz))
+		@@nextstep = Button.new("Next Step ->")
+		@@nextstep.getStyle().setFont(SuSolverGui.font(@@formFontSz))
+		SuSolverGui.reorient()
+		@@lbtns.addComponent(@@reset)
+		@@lbtns.addComponent(@@showlog)
+		@@rbtns.addComponent(@@solve)
+		@@rbtns.addComponent(@@nextstep)
+		#[@@solve, @@nextstep, @@reset, @@showlog].each {|btn:Button| btn.setPreferredW(SuSolverGui.sideRoom()) }
+		#[lbtns, rbtns].each do |btns:Container| 
+		@@reset.addActionListener do |e:ActionEvent|
+			SuSolverGui.doButton("Reset")
+		end
+		@@showlog.addActionListener do |e:ActionEvent|
+			SuSolverGui.doButton("Show Log")
+		end
+		@@solve.addActionListener do |e:ActionEvent|
+			SuSolverGui.doButton("Solve!")
+		end
+		@@nextstep.addActionListener do |e:ActionEvent|
+			SuSolverGui.doButton("Next Step ->")
+		end
+		/*[@@lbtns, @@rbtns].each do |btns:Container| 
+			if SuSolverGui.isWide()
+				btns.setPreferredW(SuSolverGui.sideRoom())
+				btns.setPreferredH(SuSolverGui.puzMaxWH())
+			else
+				btns.setPreferredW(SuSolverGui.puzMaxWH())
+				btns.setPreferredH(SuSolverGui.sideRoom())
+			end
+		end*/
+		se.addComponent(@@lbtns)
 		se.addComponent(boxl)
+		se.addComponent(@@rbtns)
+		se.addOrientationListener {|e:ActionEvent| SuSolverGui.reorient() }
+		se.getStyle().setFont(SuSolverGui.font(@@formFontSz))
 		return se
+	end
+	
+	def self.font(sz:int):Font
+		@@theFont.derive(sz, Font.STYLE_BOLD)
 	end
 end
