@@ -10,10 +10,10 @@ import java.util.Arrays
 import java.util.ArrayList
 import java.io.Console
 
-import Ops
-import SuClass
-import SuCell
-import SuBlock
+#import Ops
+#import SuClass
+#import SuCell
+#import SuBlock
 
 /**
  *
@@ -460,7 +460,7 @@ class SuPuzzle < SuClass
 			if c2 == nil
 				return ((c1 == @ltc) or (c1 == @rtc))
 			else
-				return (contains?(c1) and containsBool(c2))
+				return (containsBool(c1) and containsBool(c2))
 			end
 		end
 		
@@ -488,7 +488,7 @@ class SuPuzzle < SuClass
 		def cycle(first = XCycle(self)):XCycle[]
 			out = ArrayList.new()
 			out.add(self)
-			return out.toArray(XCycle[0]) if (!hasRtx?() or (@rtx == first))
+			return out.toArray(XCycle[0]) if (!hasRtxBool() or (@rtx == first))
 			@rtx.cycle(first).each {|xc:XCycle| out.add(xc) }
 			return out.toArray(XCycle[0])
 		end
@@ -910,15 +910,15 @@ class SuPuzzle < SuClass
 		end
 		
 		def boxNbrRegBool():boolean
-			return (boxNbr?() and Chain.inChainBool(@boxNbr))
+			return (boxNbrBool() and Chain.inChainBool(@boxNbr))
 		end
 		
 		def rowNbrRegBool():boolean
-			return (rowNbr?() and Chain.inChainBool(@rowNbr))
+			return (rowNbrBool() and Chain.inChainBool(@rowNbr))
 		end
 		
 		def colNbrRegBool():boolean
-			return (colNbr?() and Chain.inChainBool(@colNbr))
+			return (colNbrBool() and Chain.inChainBool(@colNbr))
 		end
 		
 		def boxNbrS():String
@@ -1058,7 +1058,7 @@ class SuPuzzle < SuClass
 		end
 		
 		def followChain(clr1:String, clr2:String):void
-			return if (coloured?() or conflictBool())
+			return if (colouredBool() or conflictBool())
 			noFollow = false
 			if chainEndBool()
 				if nbrColour().equals(:none)
@@ -1305,7 +1305,7 @@ class SuPuzzle < SuClass
 			print()
 			autoCheck()
 		end
-		if (@guessMode and !(solved?() or brokenBool()))
+		if (@guessMode and !(solvedBool() or brokenBool()))
 			print()
 			puts "Guessing..." unless guiModeBool()
 			guessCheck()
@@ -1315,7 +1315,7 @@ class SuPuzzle < SuClass
 	
 	def autoCheck():void
 		i = 0
-		until (solved?() or brokenBool())
+		until (solvedBool() or brokenBool())
 			if checkStep(i)
 				i = i + 1 unless brokenBool()
 			else
@@ -1327,9 +1327,9 @@ class SuPuzzle < SuClass
 	end
 	
 	def stepCheck():void
-		return if (solved?() or brokenBool())
+		return if (solvedBool() or brokenBool())
 		s1 = pmarks_s + to_s
-		unless (solved?() or brokenBool())
+		unless (solvedBool() or brokenBool())
 			if checkStep(@step)
 				@step = @step + 1 unless brokenBool()
 			else
@@ -1337,7 +1337,7 @@ class SuPuzzle < SuClass
 			end
 		end
 		s2 = pmarks_s + to_s
-		stepCheck() if ((@step < @stepMax) and (s2.equals(s1) and (!solved?() and !broken?())))
+		stepCheck() if ((@step < @stepMax) and (s2.equals(s1) and (!solvedBool() and !brokenBool())))
 	end
 	
 	def checkStep(i:int):boolean
@@ -1810,7 +1810,7 @@ class SuPuzzle < SuClass
 		return guesser(c + 1) if @cells[@sorted[c]].setBool()
 		#gcheck(c, true)
 		if @cells[@sorted[c]].gsetBool() # @sorted[c]
-			if (gsolved?() or (((c + 1) < @cells.length) and guesser(c + 1)))
+			if (gsolvedBool() or (((c + 1) < @cells.length) and guesser(c + 1)))
 				@cells.length.times {|ic| @cells[@sorted[ic]].setToGuess() if (ic >= c) } unless @guessFail
 				return true
 			end
@@ -1826,9 +1826,9 @@ class SuPuzzle < SuClass
 				@cells.length.times {|ic| @cells[@sorted[ic]].setToGuess() if (ic >= c) }
 				return true
 			end
-			#(puts c; @guessFail = !continue?()) if c < 9 # if ((c >= (Ops.pow(@size, 2) * (Ops.pow(@size, 2) - 1))) and ((c % Ops.pow(@size, 2)) == 0))
+			#(puts c; @guessFail = !continueBool()) if c < 9 # if ((c >= (Ops.pow(@size, 2) * (Ops.pow(@size, 2) - 1))) and ((c % Ops.pow(@size, 2)) == 0))
 			#return true if @guessFail
-			if !gbroken?()
+			if !gbrokenBool()
 				if (((c + 1) < @cells.length) and guesser(c + 1))
 					@cells[@sorted[c]].setToGuess() unless @guessFail
 					return true

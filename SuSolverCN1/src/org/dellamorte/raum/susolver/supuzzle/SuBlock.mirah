@@ -8,9 +8,9 @@ package org.dellamorte.raum.susolver.supuzzle
 import java.util.Arrays
 import java.util.ArrayList
 
-import Ops
-import SuClass
-import SuCell
+#import Ops
+#import SuClass
+#import SuCell
 
 /**
  *
@@ -230,19 +230,19 @@ class SuBlock < SuClass
 	end
 	
 	def canbeRowBool(rc:int, n:int):boolean
-		canbeChunk?(false, :row, rc, n)
+		canbeChunkBool(false, :row, rc, n)
 	end
 	
 	def canbeColBool(rc:int, n:int):boolean
-		canbeChunk?(false, :col, rc, n)
+		canbeChunkBool(false, :col, rc, n)
 	end
 	
 	def gcanbeRowBool(rc:int, n:int):boolean
-		canbeChunk?(true, :row, rc, n)
+		canbeChunkBool(true, :row, rc, n)
 	end
 	
 	def gcanbeColBool(rc:int, n:int):boolean
-		canbeChunk?(true, :col, rc, n)
+		canbeChunkBool(true, :col, rc, n)
 	end
 	
 	def inChunks(gflag:boolean, rowcol:String, num:int):int[]
@@ -315,19 +315,19 @@ class SuBlock < SuClass
 	end
 	
 	def onlyRowBool(i:int, num:int):boolean
-		onlyChunk?(:row, i, num)
+		onlyChunkBool(:row, i, num)
 	end
 	
 	def onlyColBool(i:int, num:int):boolean
-		onlyChunk?(:col, i, num)
+		onlyChunkBool(:col, i, num)
 	end
 	
 	def gonlyRowBool(i:int, num:int):boolean
-		gonlyChunk?(:row, i, num)
+		gonlyChunkBool(:row, i, num)
 	end
 	
 	def gonlyColBool(i:int, num:int):boolean
-		gonlyChunk?(:col, i, num)
+		gonlyChunkBool(:col, i, num)
 	end
 	
 	def conflictBool(n:int):boolean

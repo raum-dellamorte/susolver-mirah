@@ -9,8 +9,8 @@ package org.dellamorte.raum.susolver.supuzzle
 import java.util.Arrays
 import java.util.ArrayList
 	
-import Ops
-import SuClass
+#import Ops
+#import SuClass
 
 /**
  *
@@ -89,7 +89,7 @@ class SuCell < SuClass
 	end
 	
 	def eliminatedBool(num:int):boolean
-		return true if (set?() and (num != @is))
+		return true if (setBool() and (num != @is))
 		return false if ((@guessing and (@glim.length == 0)) or (!@guessing and (@elim.length == 0)))
 		return ((@guessing and Ops.containsBool(@glim, num)) or (!@guessing and Ops.containsBool(@elim, num)))
 	end
@@ -149,7 +149,7 @@ class SuCell < SuClass
 	end
 	
 	def setToGuess():void
-		set(@guess) if (!set?() and gsetBool())
+		set(@guess) if (!setBool() and gsetBool())
 	end
 	
 	def setBool():boolean
@@ -157,7 +157,7 @@ class SuCell < SuClass
 	end
 	
 	def gsetBool():boolean
-		set?() or (@guess != 0)
+		setBool() or (@guess != 0)
 	end
 	
 	def canSeeBool(cel:SuClass):boolean
@@ -175,7 +175,7 @@ class SuCell < SuClass
 			s1 = to_s()
 			gcalcPMarks()
 			nextGuess() if @gpmarks.length == 1
-			return if (gset?() or gbrokenBool())
+			return if (gsetBool() or gbrokenBool())
 			s2 = to_s()
 		end
 	end
@@ -218,7 +218,7 @@ class SuCell < SuClass
 	
 	def canbeBool(n:int):boolean
 		return false if (n == 0)
-		return !eliminated?(n)
+		return !eliminatedBool(n)
 	end
 	
 	def gcanbeBool(n:int):boolean
@@ -232,7 +232,7 @@ class SuCell < SuClass
 	end
 	
 	def setIfOnlyCell():void
-		return if (set?() or (pmarks().length == 0))
+		return if (setBool() or (pmarks().length == 0))
 		pmarks().length.times {|i|
 			#puts "" + pmarks().length + " " + i
 			x = @parent.box(@box).onlyCellBool(SuClass(self), pmarks()[i])
