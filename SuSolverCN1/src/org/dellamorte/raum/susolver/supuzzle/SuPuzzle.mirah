@@ -43,9 +43,9 @@ class SuPuzzle < SuClass
 			#@@bookmark = 0 - 1
 			out = ArrayList.new()
 			cels.each do |c:SuCell|
-				next if c.set?()
+				next if c.setBool()
 				next if (c.pmarks().length < 2)
-				out.add(c) if Ops.contains?(c.pmarks(), n)
+				out.add(c) if Ops.containsBool(c.pmarks(), n)
 			end
 			@@cels = out.toArray(SuCell[0])
 			XCycle.findStrongLinks()
@@ -68,7 +68,7 @@ class SuPuzzle < SuClass
 			return @@reg
 		end
 		
-		def self.empty?():boolean
+		def self.emptyBool():boolean
 			return (@@reg.length == 0)
 		end
 		
@@ -78,10 +78,10 @@ class SuPuzzle < SuClass
 			return out
 		end
 		
-		def self.regContains?(c1:SuCell, c2:SuCell):boolean
+		def self.regContainsBool(c1:SuCell, c2:SuCell):boolean
 			out = false
 			@@reg.each {|c:XCycle|
-				next unless c.contains?(c1, c2)
+				next unless c.containsBool(c1, c2)
 				out = true
 				break
 			}
@@ -91,7 +91,7 @@ class SuPuzzle < SuClass
 		def self.get(c1:SuCell, c2:SuCell):XCycle
 			out = XCycle(nil)
 			@@reg.each {|c:XCycle|
-				next unless c.contains?(c1, c2)
+				next unless c.containsBool(c1, c2)
 				out = c
 				break
 			}
@@ -99,7 +99,7 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.add(c1:SuCell, c2:SuCell, weak = false):XCycle
-			unless XCycle.regContains?(c1, c2)
+			unless XCycle.regContainsBool(c1, c2)
 				reg = ArrayList.new()
 				@@reg.each {|c:XCycle| reg.add(c) }
 				nx = XCycle.new(c1,c2,weak)
@@ -117,13 +117,13 @@ class SuPuzzle < SuClass
 					next unless ici > oci
 					c1 = @@cels[oci]
 					c2 = @@cels[ici]
-					next unless c1.canSee?(SuClass(c2))
+					next unless c1.canSeeBool(SuClass(c2))
 					test = false
 					@@cels.length.times {|tci|
 						next if tci == oci
 						next if tci == ici
 						tc = @@cels[tci]
-						test = (tc.canSee?(SuClass(c1)) and tc.canSee?(SuClass(c2)))
+						test = (tc.canSeeBool(SuClass(c1)) and tc.canSeeBool(SuClass(c2)))
 						break if test
 					}
 					next if test
@@ -137,20 +137,20 @@ class SuPuzzle < SuClass
 			XCycle.connectWeakLinks()
 			newreg = ArrayList.new()
 			@@reg.each {|xc:XCycle|
-				if xc.weak?()
+				if xc.weakBool()
 					newreg.add(xc)
 					next
 				end
-				next if (!xc.hasLtx?() and !xc.hasRtx?())
+				next if (!xc.hasLtxBool() and !xc.hasRtxBool())
 				newreg.add(xc)
 			}
 			@@reg = newreg.toArray(XCycle[0])
 #			XCycle.connectWeakLinks()
 			XCycle.connectStrongLinks()
-			XCycle.connectDblWeak() unless XCycle.loopComplete?()
+			XCycle.connectDblWeak() unless XCycle.loopCompleteBool()
 			newreg = ArrayList.new()
 			@@reg.each {|xc:XCycle|
-				next unless (xc.hasLtx?() and xc.hasRtx?())
+				next unless (xc.hasLtxBool() and xc.hasRtxBool())
 				newreg.add(xc)
 			}
 			@@reg = newreg.toArray(XCycle[0])
@@ -162,17 +162,17 @@ class SuPuzzle < SuClass
 			@@reg.length.times {|xci| creg[xci] = @@reg[xci]}
 			creg.length.times {|oxi|
 				ox = creg[oxi]
-				next if (ox.hasLtx?() and ox.hasRtx?())
+				next if (ox.hasLtxBool() and ox.hasRtxBool())
 				creg.length.times {|ixi|
 					next unless ixi > oxi
 					ix = creg[ixi]
 					next if ox == ix
-					next if ix.contains?(ox.ltc(), ox.rtc())
-					if (!ox.hasLtx?() and !ix.contains?(ox.ltc()))
-						ix.swap() if ((ox.ltc().canSee?(SuClass(ix.ltc()))) and (!ix.hasLtx?() and !ix.hasRtx?()))
-						if ox.ltc().canSee?(SuClass(ix.rtc()))
+					next if ix.containsBool(ox.ltc(), ox.rtc())
+					if (!ox.hasLtxBool() and !ix.containsBool(ox.ltc()))
+						ix.swap() if ((ox.ltc().canSeeBool(SuClass(ix.ltc()))) and (!ix.hasLtxBool() and !ix.hasRtxBool()))
+						if ox.ltc().canSeeBool(SuClass(ix.rtc()))
 							wk = XCycle.add(ix.rtc(), ox.ltc(), true)
-							if wk.weak?()
+							if wk.weakBool()
 								ix.connectRt(wk)
 								wk.connectLt(ix)
 								wk.connectRt(ox)
@@ -180,11 +180,11 @@ class SuPuzzle < SuClass
 							end
 						end
 					end
-					if (!ox.hasRtx?() and !ix.contains?(ox.rtc()))
-						ix.swap() if ((ox.rtc().canSee?(SuClass(ix.rtc()))) and (!ix.hasLtx?() and !ix.hasRtx?()))
-						if ox.rtc().canSee?(SuClass(ix.ltc()))
+					if (!ox.hasRtxBool() and !ix.containsBool(ox.rtc()))
+						ix.swap() if ((ox.rtc().canSeeBool(SuClass(ix.rtc()))) and (!ix.hasLtxBool() and !ix.hasRtxBool()))
+						if ox.rtc().canSeeBool(SuClass(ix.ltc()))
 							wk = XCycle.add(ox.rtc(), ix.ltc(), true)
-							if wk.weak?()
+							if wk.weakBool()
 								ox.connectRt(wk)
 								wk.connectLt(ox)
 								wk.connectRt(ix)
@@ -200,18 +200,18 @@ class SuPuzzle < SuClass
 			return if @@reg.length == 0
 			@@reg.length.times {|oxi|
 				ox = @@reg[oxi]
-				next if (ox.hasLtx?() and ox.hasRtx?())
+				next if (ox.hasLtxBool() and ox.hasRtxBool())
 				@@reg.length.times {|ixi|
 					next unless ixi > oxi
 					ix = @@reg[ixi]
-					next if (ix.hasLtx?() and ix.hasRtx?())
-					if (!ox.hasLtx?() and ix.contains?(ox.ltc()))
+					next if (ix.hasLtxBool() and ix.hasRtxBool())
+					if (!ox.hasLtxBool() and ix.containsBool(ox.ltc()))
 						if ox.ltc() == ix.rtc()
 							ix.connectRt(ox)
 							ox.connectLt(ix)
 						end
 					end
-					if (!ox.hasRtx?() and ix.contains?(ox.rtc()))
+					if (!ox.hasRtxBool() and ix.containsBool(ox.rtc()))
 						if ox.rtc() == ix.ltc()
 							ox.connectRt(ix)
 							ix.connectLt(ox)
@@ -227,20 +227,20 @@ class SuPuzzle < SuClass
 			@@reg.length.times {|xci| creg[xci] = @@reg[xci]}
 			creg.length.times{|oxi| 
 				ox = creg[oxi]
-				next if (ox.hasLtx?() and ox.hasRtx?())
-				next if (!ox.hasLtx?() and !ox.hasRtx?())
+				next if (ox.hasLtxBool() and ox.hasRtxBool())
+				next if (!ox.hasLtxBool() and !ox.hasRtxBool())
 				creg.length.times{|ixi| 
 					next unless ixi > oxi
 					ix = creg[ixi]
-					next if (ix.hasLtx?() and ix.hasRtx?())
-					next if (!ix.hasLtx?() and !ix.hasRtx?())
-					next unless ((!ix.hasLtx?() and !ox.hasRtx?()) or (!ox.hasLtx?() and !ix.hasRtx?()))
-					if (!ix.hasLtx?() and !ox.hasRtx?())
+					next if (ix.hasLtxBool() and ix.hasRtxBool())
+					next if (!ix.hasLtxBool() and !ix.hasRtxBool())
+					next unless ((!ix.hasLtxBool() and !ox.hasRtxBool()) or (!ox.hasLtxBool() and !ix.hasRtxBool()))
+					if (!ix.hasLtxBool() and !ox.hasRtxBool())
 						c1 = ix.ltc()
 						c2 = ox.rtc()
 						x1 = ox
 						x2 = ix
-					elsif (!ox.hasLtx?() and !ix.hasRtx?())
+					elsif (!ox.hasLtxBool() and !ix.hasRtxBool())
 						c1 = ox.ltc()
 						c2 = ix.rtc()
 						x1 = ix
@@ -249,7 +249,7 @@ class SuPuzzle < SuClass
 					@@cels.each {|tc|
 						next if tc == c1
 						next if tc == c2
-						next unless (tc.canSee?(SuClass(c1)) and tc.canSee?(SuClass(c2)))
+						next unless (tc.canSeeBool(SuClass(c1)) and tc.canSeeBool(SuClass(c2)))
 						wk1 = XCycle.add(c2, tc, true)
 						wk2 = XCycle.add(tc, c1, true)
 						x1.connectRt(wk1)
@@ -264,15 +264,15 @@ class SuPuzzle < SuClass
 			}
 		end
 		
-		def self.loopComplete?():boolean
+		def self.loopCompleteBool():boolean
 			return false if @@reg.length < 3
 			cnt = 0
-			@@reg.each {|xc:XCycle| cnt = cnt + 1 if xc.strong?() }
+			@@reg.each {|xc:XCycle| cnt = cnt + 1 if xc.strongBool() }
 			return false if cnt < 2
 			tmp = @@reg[0].cycle()
 			test = false
 			tmp.each {|xc:XCycle| 
-				next if (xc.hasLtx?() and xc.hasRtx?())
+				next if (xc.hasLtxBool() and xc.hasRtxBool())
 				test = true
 				break
 			}
@@ -288,22 +288,22 @@ class SuPuzzle < SuClass
 		
 		def self.loop_s():String
 			tmp = ""
-			return tmp if ((@@reg.length == 0) or !XCycle.loopComplete?())
+			return tmp if ((@@reg.length == 0) or !XCycle.loopCompleteBool())
 			@@reg[0].cycle().each {|xc:XCycle| tmp = tmp + xc.to_s() + "\n"}
 			return tmp
 		end
 		
 		def self.elimTwoStrongLinks():ElimGroup
-			unless XCycle.loopComplete?()
+			unless XCycle.loopCompleteBool()
 				puts "No Loop: " + XCycle.reg_s()
 				return ElimGroup(nil)
 			end
 			strong = SuCell(nil)
 			@@reg[0].cycle().each {|xc:XCycle| 
-				next if xc.weak?()
-				next if (xc.ltStrong?() and xc.rtStrong?())
-				strong = xc.ltc() if xc.ltStrong?()
-				strong = xc.rtc() if xc.rtStrong?()
+				next if xc.weakBool()
+				next if (xc.ltStrongBool() and xc.rtStrongBool())
+				strong = xc.ltc() if xc.ltStrongBool()
+				strong = xc.rtc() if xc.rtStrongBool()
 				break if strong != nil
 			}
 			return ElimGroup(nil) if strong == nil
@@ -311,7 +311,7 @@ class SuPuzzle < SuClass
 			elim.addVal(@@val)
 			@@cels.each {|c:SuCell|
 				next if c == strong
-				next unless strong.canSee?(SuClass(c))
+				next unless strong.canSeeBool(SuClass(c))
 				elim.addCell(c)
 			}
 			return ElimGroup(nil) if elim.cells().length() == 0
@@ -320,15 +320,15 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.elimTwoWeakLinks():ElimGroup
-			unless XCycle.loopComplete?()
+			unless XCycle.loopCompleteBool()
 				puts "No Loop: " + XCycle.reg_s()
 				return ElimGroup(nil)
 			end
 			weak = SuCell(nil)
 			@@reg[0].cycle().each {|xc:XCycle| 
-				next if xc.strong?()
-				weak = xc.ltc() if xc.ltWeak?()
-				weak = xc.rtc() if xc.rtWeak?()
+				next if xc.strongBool()
+				weak = xc.ltc() if xc.ltWeakBool()
+				weak = xc.rtc() if xc.rtWeakBool()
 				break if weak != nil
 			}
 			return ElimGroup(nil) if weak == nil
@@ -340,18 +340,18 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.elimWeakLink():ElimGroup
-			unless XCycle.loopComplete?()
+			unless XCycle.loopCompleteBool()
 				puts "No Loop: " + XCycle.reg_s()
 				return ElimGroup(nil)
 			end
 			elim = ElimGroup.new()
 			elim.addVal(@@val)
 			@@reg[0].cycle().each {|xc:XCycle| 
-				next unless xc.weak?()
+				next unless xc.weakBool()
 				@@cels.each {|tc| 
 					next if tc == xc.ltc()
 					next if tc == xc.rtc()
-					next unless (tc.canSee?(SuClass(xc.ltc())) and tc.canSee?(SuClass(xc.rtc())))
+					next unless (tc.canSeeBool(SuClass(xc.ltc())) and tc.canSeeBool(SuClass(xc.rtc())))
 					elim.addCell(tc)
 				}
 			}
@@ -375,15 +375,15 @@ class SuPuzzle < SuClass
 				typ = " Strong "
 			end
 			ltLnk = ""
-			if hasLtx?()
+			if hasLtxBool()
 				tpl = "-S-"
-				tpl = "-W-" if @ltx.weak?() 
+				tpl = "-W-" if @ltx.weakBool() 
 				ltLnk = "Lt: " + @ltx.ltc().brc_s() + tpl + @ltx.rtc().brc_s() + " "
 			end
 			rtLnk = ""
-			if hasRtx?()
+			if hasRtxBool()
 				tpr = "-S-"
-				tpr = "-W-" if @rtx.weak?() 
+				tpr = "-W-" if @rtx.weakBool() 
 				rtLnk = " Rt: " + @rtx.ltc().brc_s() + tpr + @rtx.rtc().brc_s()
 			end
 			return ltLnk + "Left: " + @ltc.brc_s() + typ  + "Right: " + @rtc.brc_s() + rtLnk
@@ -397,11 +397,11 @@ class SuPuzzle < SuClass
 			@weak = weak
 		end
 		
-		def weak?():boolean
+		def weakBool():boolean
 			return @weak
 		end
 		
-		def strong?():boolean
+		def strongBool():boolean
 			return !@weak
 		end
 		
@@ -421,32 +421,32 @@ class SuPuzzle < SuClass
 			@rtx
 		end
 		
-		def hasLtx?():boolean
+		def hasLtxBool():boolean
 			@ltx != nil
 		end
 		
-		def hasRtx?():boolean
+		def hasRtxBool():boolean
 			@rtx != nil
 		end
 		
-		def ltStrong?():boolean
-			return false unless hasLtx?()
-			return @ltx.strong?()
+		def ltStrongBool():boolean
+			return false unless hasLtxBool()
+			return @ltx.strongBool()
 		end
 		
-		def rtStrong?():boolean
-			return false unless hasRtx?()
-			return @rtx.strong?()
+		def rtStrongBool():boolean
+			return false unless hasRtxBool()
+			return @rtx.strongBool()
 		end
 		
-		def ltWeak?():boolean
-			return false unless hasLtx?()
-			return @ltx.weak?()
+		def ltWeakBool():boolean
+			return false unless hasLtxBool()
+			return @ltx.weakBool()
 		end
 		
-		def rtWeak?():boolean
-			return false unless hasRtx?()
-			return @rtx.weak?()
+		def rtWeakBool():boolean
+			return false unless hasRtxBool()
+			return @rtx.weakBool()
 		end
 		
 		def swap():void
@@ -456,11 +456,11 @@ class SuPuzzle < SuClass
 			@rtc = c2
 		end
 		
-		def contains?(c1:SuCell, c2 = SuCell(nil)):boolean
+		def containsBool(c1:SuCell, c2 = SuCell(nil)):boolean
 			if c2 == nil
 				return ((c1 == @ltc) or (c1 == @rtc))
 			else
-				return (contains?(c1) and contains?(c2))
+				return (contains?(c1) and containsBool(c2))
 			end
 		end
 		
@@ -475,13 +475,13 @@ class SuPuzzle < SuClass
 		
 		def connectLt(cyc:XCycle):void
 			return if self == cyc
-			return if cyc.contains?(@ltc, @rtc)
+			return if cyc.containsBool(@ltc, @rtc)
 			@ltx = cyc
 		end
 		
 		def connectRt(cyc:XCycle):void
 			return if self == cyc
-			return if cyc.contains?(@ltc, @rtc)
+			return if cyc.containsBool(@ltc, @rtc)
 			@rtx = cyc
 		end
 		
@@ -493,7 +493,7 @@ class SuPuzzle < SuClass
 			return out.toArray(XCycle[0])
 		end
 		
-		def continue?():boolean
+		def continueBool():boolean
 			#console = Console(System.console())
 			#rl = console.readLine("Continue? ")
 			#return false if rl.equals("q")
@@ -508,9 +508,9 @@ class SuPuzzle < SuClass
 			@@bookmark = 0 - 1
 			out = ArrayList.new()
 			cels.each do |c:SuCell|
-				next if c.set?()
+				next if c.setBool()
 				next if (c.pmarks().length < 2)
-				out.add(c) if Ops.contains?(c.pmarks(), n)
+				out.add(c) if Ops.containsBool(c.pmarks(), n)
 			end
 			@@cels = out.toArray(SuCell[0])
 		end
@@ -531,7 +531,7 @@ class SuPuzzle < SuClass
 			return @@reg
 		end
 		
-		def self.empty?():boolean
+		def self.emptyBool():boolean
 			return (@@reg.length == 0)
 		end
 		
@@ -554,7 +554,7 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.get(cel:String):Chain
-			return Chain(nil) if Chain.empty?()
+			return Chain(nil) if Chain.emptyBool()
 			out = Chain(nil)
 			@@reg.each do |chn:Chain|
 				break if out != nil
@@ -565,7 +565,7 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.get(cel:SuCell):Chain
-			return Chain(nil) if Chain.empty?()
+			return Chain(nil) if Chain.emptyBool()
 			out = Chain(nil)
 			@@reg.each do |chn:Chain|
 				break if out != nil
@@ -603,11 +603,11 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.populate():void
-			return if Chain.empty?()
+			return if Chain.emptyBool()
 			return if ((@@reg.length == 1) and (@@reg[0].nbrS().length == 0))
-			while Chain.hasUnReg?()
+			while Chain.hasUnRegBool()
 				@@reg.each do |chn:Chain|
-					next unless chn.unRegNbrs?()
+					next unless chn.unRegNbrsBool()
 					chn.nbrCells().each do |c:SuCell|
 						Chain.add(c)
 					end
@@ -615,11 +615,11 @@ class SuPuzzle < SuClass
 			end
 		end
 		
-		def self.hasUnReg?():boolean
-			return false if Chain.empty?()
+		def self.hasUnRegBool():boolean
+			return false if Chain.emptyBool()
 			out = false
 			@@reg.each do |chn:Chain|
-				next unless chn.unRegNbrs?()
+				next unless chn.unRegNbrsBool()
 				out = true
 				break
 			end
@@ -631,73 +631,73 @@ class SuPuzzle < SuClass
 			return @@reg.length()
 		end
 		
-		def self.inChain?(cel:String):boolean
-			return false if Chain.empty?()
+		def self.inChainBool(cel:String):boolean
+			return false if Chain.emptyBool()
 			return true if (Chain.get(cel) != nil)
 			return false
 		end
 		
-		def self.inChain?(cel:SuCell):boolean
-			return false if Chain.empty?()
+		def self.inChainBool(cel:SuCell):boolean
+			return false if Chain.emptyBool()
 			return true if (Chain.get(cel) != nil)
 			return false
 		end
 		
-		def self.coloured?(cel:String):boolean
-			return false if Chain.empty?()
+		def self.colouredBool(cel:String):boolean
+			return false if Chain.emptyBool()
 			x = Chain.get(cel)
-			return x.coloured?() unless x == nil
+			return x.colouredBool() unless x == nil
 			return false
 		end
 		
-		def self.coloured?(cel:SuCell):boolean
-			return false if Chain.empty?()
+		def self.colouredBool(cel:SuCell):boolean
+			return false if Chain.emptyBool()
 			x = Chain.get(cel)
-			return x.coloured?() unless x == nil
+			return x.colouredBool() unless x == nil
 			return false
 		end
 		
-		def self.conflict?(cel:String):boolean
-			return false if Chain.empty?()
+		def self.conflictBool(cel:String):boolean
+			return false if Chain.emptyBool()
 			x = Chain.get(cel)
-			return x.conflict?() unless x == nil
+			return x.conflictBool() unless x == nil
 			return false
 		end
 		
-		def self.conflict?(cel:SuCell):boolean
-			return false if Chain.empty?()
+		def self.conflictBool(cel:SuCell):boolean
+			return false if Chain.emptyBool()
 			x = Chain.get(cel)
-			return x.conflict?() unless x == nil
+			return x.conflictBool() unless x == nil
 			return false
 		end
 		
-		def self.hasConflicts?():boolean
+		def self.hasConflictsBool():boolean
 			out = false
-			@@reg.each {|chn:Chain| break if out; out = true if chn.conflict?()}
+			@@reg.each {|chn:Chain| break if out; out = true if chn.conflictBool()}
 			return out
 		end
 		
-		def self.hasUncoloured?():boolean
+		def self.hasUncolouredBool():boolean
 			out = false
-			@@reg.each {|chn:Chain| break if out; out = true if !chn.coloured?()}
+			@@reg.each {|chn:Chain| break if out; out = true if !chn.colouredBool()}
 			return out
 		end
 		
 		def self.ends():Chain[]
-			return Chain[0] if Chain.empty?()
+			return Chain[0] if Chain.emptyBool()
 			out = ArrayList.new()
 			@@reg.each do |c:Chain|
-				out.add(c) if c.chainEnd?()
+				out.add(c) if c.chainEndBool()
 			end
 			return Chain[0] if out.size == 0
 			return out.toArray(Chain[0])
 		end
 		
 		def self.endsSeen(cel:SuCell):Chain[]
-			return Chain[0] if (Chain.empty?() or (Chain.ends().length == 0))
+			return Chain[0] if (Chain.emptyBool() or (Chain.ends().length == 0))
 			out = ArrayList.new()
 			Chain.ends().each do |c:Chain|
-				out.add(c) if cel.canSee?(SuClass(c.cell()))
+				out.add(c) if cel.canSeeBool(SuClass(c.cell()))
 			end
 			return Chain[0] if out.size == 0
 			return out.toArray(Chain[0])
@@ -709,7 +709,7 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.elimTwiceInUnit():ElimGroup
-			if Chain.hasConflicts?()
+			if Chain.hasConflictsBool()
 				puts "Colour Conflict in Chain"
 				return ElimGroup(nil)
 			end
@@ -721,7 +721,7 @@ class SuPuzzle < SuClass
 				@@reg.each {|ic:Chain|
 					break if !elimColor.equals(:none)
 					next unless ic != oc
-					next unless oc.cell().canSee?(SuClass(ic.cell()))
+					next unless oc.cell().canSeeBool(SuClass(ic.cell()))
 					next unless oc.colour().equals(ic.colour())
 					elimColor = oc.colour()
 				}
@@ -729,9 +729,9 @@ class SuPuzzle < SuClass
 			unless elimColor.equals(:none)
 				elim.msgAdd("Simple Coloring: " + Chain.value() + " Color Conflict: " + elimColor)
 				@@reg.each {|chn:Chain|
-					next unless chn.coloured?()
+					next unless chn.colouredBool()
 					next unless chn.colour().equals(elimColor)
-					next if chn.cell().eliminated?(Chain.value())
+					next if chn.cell().eliminatedBool(Chain.value())
 					elim.addCell(chn.cell())
 					elim.msgAdd("elim by Color " + elimColor + " " + Chain.value() + " from " + chn.cell().to_s())
 				}
@@ -740,7 +740,7 @@ class SuPuzzle < SuClass
 		end
 		
 		def self.elimTwoColors(sameUnit = false):ElimGroup
-			if Chain.hasConflicts?()
+			if Chain.hasConflictsBool()
 				puts "Colour Conflict in Chain"
 				return ElimGroup(nil)
 			end
@@ -749,23 +749,23 @@ class SuPuzzle < SuClass
 			@@reg.length.times {|oci|
 				break if elim.cells().length > 0
 				oc = @@reg[oci]
-				next unless oc.coloured?()
+				next unless oc.colouredBool()
 				@@reg.length.times {|ici|
 					break if elim.cells().length > 0
 					next unless ici > oci
 					ic = @@reg[ici]
-					next unless ic.coloured?()
+					next unless ic.colouredBool()
 					next if oc.colour().equals(ic.colour())
 					@@cels.each {|c|
-						next if Chain.inChain?(c)
+						next if Chain.inChainBool(c)
 						next if c == oc.cell()
 						next if c == ic.cell()
 						if sameUnit
-							next unless oc.cell().canSee?(SuClass(ic.cell()))
+							next unless oc.cell().canSeeBool(SuClass(ic.cell()))
 						end
-						next unless c.canSee?(SuClass(oc.cell()))
-						next unless c.canSee?(SuClass(ic.cell()))
-						next if c.eliminated?(@@val)
+						next unless c.canSeeBool(SuClass(oc.cell()))
+						next unless c.canSeeBool(SuClass(ic.cell()))
+						next if c.eliminatedBool(@@val)
 						elim.addCell(c)
 						su = ""
 						su = " in the same unit" if sameUnit
@@ -792,8 +792,8 @@ class SuPuzzle < SuClass
 			findNeighbors()
 		end
 		
-		def valid?():boolean
-			return Ops.contains?(cell().pmarks(), val())
+		def validBool():boolean
+			return Ops.containsBool(cell().pmarks(), val())
 		end
 		
 		def brc():int[]
@@ -805,7 +805,7 @@ class SuPuzzle < SuClass
 		end
 		
 		def to_s():String
-			return ("Chain Value: " + Chain.value() + " Cell: " + @cel.to_s() + " Color: " + @colour + " End?: " + chainEnd?())
+			return ("Chain Value: " + Chain.value() + " Cell: " + @cel.to_s() + " Color: " + @colour + " End?: " + chainEndBool())
 		end
 		
 		def cell():SuCell
@@ -838,15 +838,15 @@ class SuPuzzle < SuClass
 			@colour
 		end
 		
-		def coloured?():boolean
+		def colouredBool():boolean
 			!colour().equals(:none)
 		end
 		
-		def conflict?():boolean
+		def conflictBool():boolean
 			colour().equals(:conflict)
 		end
 		
-		def thisColour?(color:String):boolean
+		def thisColourBool(color:String):boolean
 			colour().equals(color)
 		end
 		
@@ -866,59 +866,59 @@ class SuPuzzle < SuClass
 		
 		def nbrS():String[]
 			out = ArrayList.new()
-			out.add(@boxNbr.brc_s()) if boxNbr?()
-			out.add(@rowNbr.brc_s()) if rowNbr?()
-			out.add(@colNbr.brc_s()) if colNbr?()
+			out.add(@boxNbr.brc_s()) if boxNbrBool()
+			out.add(@rowNbr.brc_s()) if rowNbrBool()
+			out.add(@colNbr.brc_s()) if colNbrBool()
 			return String[0] if out.size < 1
 			return out.toArray(String[0])
 		end
 		
 		def nbrCells():SuCell[]
 			out = ArrayList.new()
-			out.add(@boxNbr) if boxNbr?()
-			out.add(@rowNbr) if rowNbr?()
-			out.add(@colNbr) if colNbr?()
+			out.add(@boxNbr) if boxNbrBool()
+			out.add(@rowNbr) if rowNbrBool()
+			out.add(@colNbr) if colNbrBool()
 			return SuCell[0] if out.size < 1
 			return out.toArray(SuCell[0])
 		end
 		
 		def boxNbr():Chain
-			return Chain.get(@boxNbr) if boxNbr?()
+			return Chain.get(@boxNbr) if boxNbrBool()
 			return Chain(nil)
 		end
 		
 		def rowNbr():Chain
-			return Chain.get(@rowNbr) if rowNbr?()
+			return Chain.get(@rowNbr) if rowNbrBool()
 			return Chain(nil)
 		end
 		
 		def colNbr():Chain
-			return Chain.get(@colNbr) if colNbr?()
+			return Chain.get(@colNbr) if colNbrBool()
 			return Chain(nil)
 		end
 		
-		def boxNbr?():boolean
+		def boxNbrBool():boolean
 			return (@boxNbr != nil)
 		end
 		
-		def rowNbr?():boolean
+		def rowNbrBool():boolean
 			return (@rowNbr != nil)
 		end
 		
-		def colNbr?():boolean
+		def colNbrBool():boolean
 			return (@colNbr != nil)
 		end
 		
-		def boxNbrReg?():boolean
-			return (boxNbr?() and Chain.inChain?(@boxNbr))
+		def boxNbrRegBool():boolean
+			return (boxNbr?() and Chain.inChainBool(@boxNbr))
 		end
 		
-		def rowNbrReg?():boolean
-			return (rowNbr?() and Chain.inChain?(@rowNbr))
+		def rowNbrRegBool():boolean
+			return (rowNbr?() and Chain.inChainBool(@rowNbr))
 		end
 		
-		def colNbrReg?():boolean
-			return (colNbr?() and Chain.inChain?(@colNbr))
+		def colNbrRegBool():boolean
+			return (colNbr?() and Chain.inChainBool(@colNbr))
 		end
 		
 		def boxNbrS():String
@@ -934,24 +934,24 @@ class SuPuzzle < SuClass
 		end
 		
 		def countNeighbors():int
-			return 0 unless valid?()
+			return 0 unless validBool()
 			cnt = 0
-			cnt = cnt + 1 if boxNbr?() # (@boxNbr.length != 0)
-			cnt = cnt + 1 if rowNbr?() # (@rowNbr.length != 0)
-			cnt = cnt + 1 if colNbr?() # (@colNbr.length != 0)
+			cnt = cnt + 1 if boxNbrBool() # (@boxNbr.length != 0)
+			cnt = cnt + 1 if rowNbrBool() # (@rowNbr.length != 0)
+			cnt = cnt + 1 if colNbrBool() # (@colNbr.length != 0)
 			return cnt
 		end
 		
 		def countRegNeighbors():int
-			return 0 unless valid?()
+			return 0 unless validBool()
 			cnt = 0
-			cnt = cnt + 1 if boxNbrReg?() # (@boxNbr.length != 0)
-			cnt = cnt + 1 if rowNbrReg?() # (@rowNbr.length != 0)
-			cnt = cnt + 1 if colNbrReg?() # (@colNbr.length != 0)
+			cnt = cnt + 1 if boxNbrRegBool() # (@boxNbr.length != 0)
+			cnt = cnt + 1 if rowNbrRegBool() # (@rowNbr.length != 0)
+			cnt = cnt + 1 if colNbrRegBool() # (@colNbr.length != 0)
 			return cnt
 		end
 		
-		def unRegNbrs?():boolean
+		def unRegNbrsBool():boolean
 			return false if (countNeighbors() == 0)
 			return (countNeighbors() > countRegNeighbors())
 		end
@@ -997,7 +997,7 @@ class SuPuzzle < SuClass
 #			puts Arrays.toString(ba) + " Length: " + ba.length
 #			puts Arrays.toString(ra) + " Length: " + ra.length
 #			puts Arrays.toString(ca) + " Length: " + ca.length
-#			return unless continue?()
+#			return unless continueBool()
 			if ba.length == 1
 				@boxNbr = Chain.getCell(ba[0])
 			else
@@ -1021,17 +1021,17 @@ class SuPuzzle < SuClass
 		
 		def nbrColour():String
 			test = String[3]
-			if boxNbr?()
+			if boxNbrBool()
 				test[0] = boxNbr().colour()
 			else
 				test[0] = :none
 			end
-			if rowNbr?()
+			if rowNbrBool()
 				test[1] = rowNbr().colour()
 			else
 				test[1] = :none
 			end
-			if colNbr?()
+			if colNbrBool()
 				test[2] = colNbr().colour()
 			else
 				test[2] = :none
@@ -1047,20 +1047,20 @@ class SuPuzzle < SuClass
 			return out
 		end
 		
-		def noChain?():boolean
-			return false unless valid?()
+		def noChainBool():boolean
+			return false unless validBool()
 			return (countNeighbors() == 0)
 		end
 		
-		def chainEnd?():boolean
-			return false unless valid?()
+		def chainEndBool():boolean
+			return false unless validBool()
 			return (countNeighbors() == 1)
 		end
 		
 		def followChain(clr1:String, clr2:String):void
-			return if (coloured?() or conflict?())
+			return if (coloured?() or conflictBool())
 			noFollow = false
-			if chainEnd?()
+			if chainEndBool()
 				if nbrColour().equals(:none)
 					@colour = clr1
 					#puts "1st Chain End: " + val() + " " + @cel.brc_s() + " colored: " + clr1
@@ -1100,12 +1100,12 @@ class SuPuzzle < SuClass
 		end
 		
 		def followNbrs(clr1:String, clr2:String):void
-			boxNbr().followChain(clr1, clr2) if boxNbr?()
-			rowNbr().followChain(clr1, clr2) if rowNbr?()
-			colNbr().followChain(clr1, clr2) if colNbr?()
+			boxNbr().followChain(clr1, clr2) if boxNbrBool()
+			rowNbr().followChain(clr1, clr2) if rowNbrBool()
+			colNbr().followChain(clr1, clr2) if colNbrBool()
 		end
 		
-		def continue?():boolean
+		def continueBool():boolean
 			#console = System.console()
 			#rl = console.readLine("Continue? ")
 			#return false if rl.equals("q")
@@ -1199,7 +1199,7 @@ class SuPuzzle < SuClass
 	
 	def print():void
 		return if @guiMode
-		puts pmarks_s() unless solved?()
+		puts pmarks_s() unless solvedBool()
 		puts to_s()
 	end
 	
@@ -1210,7 +1210,7 @@ class SuPuzzle < SuClass
 	
 	def to_s():String
 		s = ""
-		s = s + "Fail\n" if broken?()
+		s = s + "Fail\n" if brokenBool()
 		Ops.pow(@size, 2).times do |i|
 			rw = row(i + 1).cells()
 			Ops.pow(@size, 2).times {|n| s = s + rw[n].val + " "; s = s + " " if (((n + 1) % @size) == 0)}
@@ -1222,7 +1222,7 @@ class SuPuzzle < SuClass
 	
 	def g_to_s():String
 		s = ""
-		s = s + "Fail\n" if broken?()
+		s = s + "Fail\n" if brokenBool()
 		Ops.pow(@size, 2).times do |i|
 			rw = row(i + 1).cells()
 			Ops.pow(@size, 2).times {|n| s = s + rw[n].gval + " "; s = s + " " if (((n + 1) % @size) == 0)}
@@ -1236,7 +1236,7 @@ class SuPuzzle < SuClass
 		s = ""
 		Ops.pow(@size, 2).times {|b|
 			blk = SuBlock(box(b + 1))
-			blk.cells().length.times {|c| s = s +  blk.cells[c].to_s + "\n" if !blk.cells[c].set?() }
+			blk.cells().length.times {|c| s = s +  blk.cells[c].to_s + "\n" if !blk.cells[c].setBool() }
 		}
 		return s
 	end
@@ -1245,7 +1245,7 @@ class SuPuzzle < SuClass
 		s = ""
 		Ops.pow(@size, 2).times {|b|
 			blk = box(b + 1)
-			blk.cells.length.times {|c| s = s + blk.cells[c].to_s + "\n" if !blk.cells[c].set?() }
+			blk.cells.length.times {|c| s = s + blk.cells[c].to_s + "\n" if !blk.cells[c].setBool() }
 		}
 		return s
 	end
@@ -1286,7 +1286,7 @@ class SuPuzzle < SuClass
 		@guiMode = tf
 	end
 	
-	def guiMode?():boolean
+	def guiModeBool():boolean
 		@guiMode
 	end
 	
@@ -1294,20 +1294,20 @@ class SuPuzzle < SuClass
 		@guessMode = tf
 	end
 	
-	def guessMode?():boolean
+	def guessModeBool():boolean
 		@guessMode
 	end
 	
 	def solve():void # note to self. don't try to solve if there are no clues.
-		puts to_s() unless guiMode?()
+		puts to_s() unless guiModeBool()
 		basicCheck()
-		unless solved?()
+		unless solvedBool()
 			print()
 			autoCheck()
 		end
-		if (@guessMode and !(solved?() or broken?()))
+		if (@guessMode and !(solved?() or brokenBool()))
 			print()
-			puts "Guessing..." unless guiMode?()
+			puts "Guessing..." unless guiModeBool()
 			guessCheck()
 		end
 		print()
@@ -1315,25 +1315,25 @@ class SuPuzzle < SuClass
 	
 	def autoCheck():void
 		i = 0
-		until (solved?() or broken?())
+		until (solved?() or brokenBool())
 			if checkStep(i)
-				i = i + 1 unless broken?()
+				i = i + 1 unless brokenBool()
 			else
-				i = 0 unless broken?()
+				i = 0 unless brokenBool()
 			end
-			break if ((i >= @stepMax) or broken?())
+			break if ((i >= @stepMax) or brokenBool())
 		end
-		puts "Broken By: " + i if broken?()
+		puts "Broken By: " + i if brokenBool()
 	end
 	
 	def stepCheck():void
-		return if (solved?() or broken?())
+		return if (solved?() or brokenBool())
 		s1 = pmarks_s + to_s
-		unless (solved?() or broken?())
+		unless (solved?() or brokenBool())
 			if checkStep(@step)
-				@step = @step + 1 unless broken?()
+				@step = @step + 1 unless brokenBool()
 			else
-				@step = 0 unless broken?()
+				@step = 0 unless brokenBool()
 			end
 		end
 		s2 = pmarks_s + to_s
@@ -1390,9 +1390,9 @@ class SuPuzzle < SuClass
 					next unless oc.val() == n
 					@cells.each do |ic:SuCell|
 						next if oc == ic
-						next if ic.set?()
-						next unless ic.canbe?(n)
-						elimGrp.add(ic) if ic.canSee?(SuClass(oc))
+						next if ic.setBool()
+						next unless ic.canbeBool(n)
+						elimGrp.add(ic) if ic.canSeeBool(SuClass(oc))
 					end
 				end
 				na = int[1]
@@ -1417,10 +1417,10 @@ class SuPuzzle < SuClass
 	def hiddenSingle():void
 		msg = "Hidden Singles: "
 		@cells.each {|c:SuCell|
-			next if c.set?()
+			next if c.setBool()
 			9.times do |i|
 				n = i + 1
-				if (box(c.box_id()).onlyCell?(SuClass(c), n) or (row(c.row_id()).onlyCell?(SuClass(c), n) or col(c.col_id()).onlyCell?(SuClass(c), n)))
+				if (box(c.box_id()).onlyCellBool(SuClass(c), n) or (row(c.row_id()).onlyCellBool(SuClass(c), n) or col(c.col_id()).onlyCellBool(SuClass(c), n)))
 					c.set(n)
 					msg = msg + "\n" + "Cell at " + c.brc_s + " is the only cell in it's row, col, or box that can be " + n + ". Set."
 				end
@@ -1436,14 +1436,14 @@ class SuPuzzle < SuClass
 			cln.times {|ici|
 				next unless ici > oci
 				c2 = @cells[ici]
-				next unless c1.canSee?(SuClass(c2))
+				next unless c1.canSeeBool(SuClass(c2))
 				next unless c2.pmarks().length == 2
 				next unless Ops.union(c1.pmarks(), c2.pmarks()).length == 2
 				elimGrp = ArrayList.new()
 				@cells.each do |c:SuCell|
 					next if c == c1
 					next if c == c2
-					next unless (c.canSee?(SuClass(c1)) and c.canSee?(SuClass(c2)))
+					next unless (c.canSeeBool(SuClass(c1)) and c.canSeeBool(SuClass(c2)))
 					elimGrp.add(c)
 				end
 				na = c1.pmarks()
@@ -1465,7 +1465,7 @@ class SuPuzzle < SuClass
 			3.times {|ibrc|
 				cels = SuCell[].cast(brc[ibrc].cells())
 				cels.length.times {|oc|
-					next if ((gflag and cels[oc].gset?()) or cels[oc].set?())
+					next if ((gflag and cels[oc].gsetBool()) or cels[oc].setBool())
 					if gflag
 						ocr = cels[oc].gpmarks()
 					else
@@ -1475,13 +1475,13 @@ class SuPuzzle < SuClass
 					exclude = int[1]
 					exclude[0] = oc
 					cels.length.times {|ic|
-						next if ((oc == ic) or ((gflag and cels[ic].gset?()) or cels[ic].set?()))
+						next if ((oc == ic) or ((gflag and cels[ic].gsetBool()) or cels[ic].setBool()))
 						if gflag
 							icr = cels[ic].gpmarks()
 						else
 							icr = cels[ic].pmarks()
 						end
-						next unless ((icr.length > 1) and Ops.isSubset?(ocr, icr))
+						next unless ((icr.length > 1) and Ops.isSubsetBool(ocr, icr))
 						exclude = Ops.appendUniq(exclude, ic)
 					}
 					next unless ((exclude.length > 1) and (ocr.length == exclude.length))
@@ -1503,8 +1503,8 @@ class SuPuzzle < SuClass
 				rexclude = int[0]
 				cexclude = int[0]
 				cels.length.times {|c|
-					next if ((gflag and cels[c].gset?()) or cels[c].set?)
-					next unless Ops.contains?(cels[c].pmarks(), num)
+					next if ((gflag and cels[c].gsetBool()) or cels[c].setBool)
+					next unless Ops.containsBool(cels[c].pmarks(), num)
 					rows = Ops.appendUniq(rows, cels[c].row_id())
 					cols = Ops.appendUniq(cols, cels[c].col_id())
 					rexclude = Ops.appendUniq(rexclude, cels[c].col_id() - 1)
@@ -1544,14 +1544,14 @@ class SuPuzzle < SuClass
 							end
 							Ops.pow(@size, 2).times {|ni|
 								num = ni + 1
-								next unless (((!cels1[oc].set?() and Ops.contains?(cels1[oc].pmarks(), num)) and (!cels1[ic].set?() and Ops.contains?(cels1[ic].pmarks(), num))) and 
-										((!cels2[oc].set?() and Ops.contains?(cels2[oc].pmarks(), num)) and (!cels2[ic].set?() and Ops.contains?(cels2[ic].pmarks(), num))))
+								next unless (((!cels1[oc].setBool() and Ops.containsBool(cels1[oc].pmarks(), num)) and (!cels1[ic].setBool() and Ops.containsBool(cels1[ic].pmarks(), num))) and 
+										((!cels2[oc].setBool() and Ops.containsBool(cels2[oc].pmarks(), num)) and (!cels2[ic].setBool() and Ops.containsBool(cels2[ic].pmarks(), num))))
 								#puts "Found Square r" + orc + "" + irc + "c" + (oc + 1) + "" + (ic + 1) + " num " + num
 								test = true
 								Ops.pow(@size, 2).times {|icol|
 									next unless test
 									next unless ((icol != oc) and (icol != ic))
-									next unless ((!cels1[icol].set?() and Ops.contains?(cels1[icol].pmarks(), num)) or (!cels2[icol].set?() and Ops.contains?(cels2[icol].pmarks(), num)))
+									next unless ((!cels1[icol].setBool() and Ops.containsBool(cels1[icol].pmarks(), num)) or (!cels2[icol].setBool() and Ops.containsBool(cels2[icol].pmarks(), num)))
 									test = false
 								}
 								next unless test
@@ -1615,18 +1615,18 @@ class SuPuzzle < SuClass
 					next unless (c3 > c2)
 					tnums = Ops.joinUniq(Ops.joinUniq(cels[c1].pmarks(), cels[c2].pmarks()), cels[c3].pmarks())
 					next unless (tnums.length == 3)
-					next if (cels[c1].set?() or (cels[c2].set?() or cels[c3].set?()))
+					next if (cels[c1].setBool() or (cels[c2].setBool() or cels[c3].setBool()))
 					next if ((((cels[c1].row_id == cels[c2].row_id) and (cels[c2].row_id == cels[c3].row_id)) or 
 								((cels[c1].col_id == cels[c2].col_id) and (cels[c2].col_id == cels[c3].col_id))) or 
 								((cels[c1].box_id == cels[c2].box_id) and (cels[c2].box_id == cels[c3].box_id)))
-					next if (Ops.aEquals?(cels[c1].pmarks(), cels[c2].pmarks()) or 
-							(Ops.aEquals?(cels[c1].pmarks(), cels[c3].pmarks()) or 
-							Ops.aEquals?(cels[c2].pmarks(), cels[c3].pmarks())))
+					next if (Ops.aEqualsBool(cels[c1].pmarks(), cels[c2].pmarks()) or 
+							(Ops.aEqualsBool(cels[c1].pmarks(), cels[c3].pmarks()) or 
+							Ops.aEqualsBool(cels[c2].pmarks(), cels[c3].pmarks())))
 					#puts "Made it this far"
 					#puts "c1: " + cels[c1].to_s
 					#puts "c2: " + cels[c2].to_s
 					#puts "c3: " + cels[c3].to_s
-					if (cels[c1].canSee?(SuClass(cels[c2])) and (cels[c1].canSee?(SuClass(cels[c3])) and !cels[c2].canSee?(SuClass(cels[c3]))))
+					if (cels[c1].canSeeBool(SuClass(cels[c2])) and (cels[c1].canSeeBool(SuClass(cels[c3])) and !cels[c2].canSeeBool(SuClass(cels[c3]))))
 						# Hinge at c1
 						u = Ops.union(cels[c2].pmarks(), cels[c3].pmarks())
 						next if u.length == 0
@@ -1634,7 +1634,7 @@ class SuPuzzle < SuClass
 						hinge = c1
 						wing1 = c2
 						wing2 = c3
-					elsif (cels[c2].canSee?(SuClass(cels[c1])) and (cels[c2].canSee?(SuClass(cels[c3])) and !cels[c1].canSee?(SuClass(cels[c3]))))
+					elsif (cels[c2].canSeeBool(SuClass(cels[c1])) and (cels[c2].canSeeBool(SuClass(cels[c3])) and !cels[c1].canSeeBool(SuClass(cels[c3]))))
 						# Hinge at c2
 						u = Ops.union(cels[c1].pmarks(), cels[c3].pmarks())
 						next if u.length == 0
@@ -1642,7 +1642,7 @@ class SuPuzzle < SuClass
 						hinge = c2
 						wing1 = c1
 						wing2 = c3
-					elsif (cels[c3].canSee?(SuClass(cels[c1])) and (cels[c3].canSee?(SuClass(cels[c2])) and !cels[c1].canSee?(SuClass(cels[c2]))))
+					elsif (cels[c3].canSeeBool(SuClass(cels[c1])) and (cels[c3].canSeeBool(SuClass(cels[c2])) and !cels[c1].canSeeBool(SuClass(cels[c2]))))
 						# Hinge at c3
 						u = Ops.union(cels[c1].pmarks(), cels[c2].pmarks())
 						next if u.length == 0
@@ -1654,11 +1654,11 @@ class SuPuzzle < SuClass
 						next
 					end
 					@cells.length.times {|ic| 
-						next if @cells[ic].set?()
+						next if @cells[ic].setBool()
 						s = @cells[ic].to_s
 						next if (((@cells[ic] == cels[hinge]) or (@cells[ic] == cels[wing1])) or (@cells[ic] == cels[wing2]))
-						next unless (@cells[ic].canSee?(SuClass(cels[wing1])) and @cells[ic].canSee?(SuClass(cels[wing2])))
-						next if @cells[ic].eliminated?(num)
+						next unless (@cells[ic].canSeeBool(SuClass(cels[wing1])) and @cells[ic].canSeeBool(SuClass(cels[wing2])))
+						next if @cells[ic].eliminatedBool(num)
 						@cells[ic].eliminate(num)
 						@cells[ic].check()
 						next unless @verbose
@@ -1712,31 +1712,31 @@ class SuPuzzle < SuClass
 									Ops.pow(@size, 2).times {|ni|
 										num = ni + 1
 										cnt = 0
-										crefs.each {|cn| cnt = cnt + 1 if (!cels1[cn].set?() and Ops.contains?(cels1[cn].pmarks(), num)) }
+										crefs.each {|cn| cnt = cnt + 1 if (!cels1[cn].setBool() and Ops.containsBool(cels1[cn].pmarks(), num)) }
 										next unless cnt >= 2
 										cnt = 0
-										crefs.each {|cn| cnt = cnt + 1 if (!cels2[cn].set?() and Ops.contains?(cels2[cn].pmarks(), num)) }
+										crefs.each {|cn| cnt = cnt + 1 if (!cels2[cn].setBool() and Ops.containsBool(cels2[cn].pmarks(), num)) }
 										next unless cnt >= 2
 										cnt = 0
-										crefs.each {|cn| cnt = cnt + 1 if (!cels3[cn].set?() and Ops.contains?(cels3[cn].pmarks(), num)) }
+										crefs.each {|cn| cnt = cnt + 1 if (!cels3[cn].setBool() and Ops.containsBool(cels3[cn].pmarks(), num)) }
 										next unless cnt >= 2
 										#puts "Found Square r" + rc1 + "" + rc2 + "c" + (oc + 1) + "" + (ic + 1) + " num " + num
 										cnt = 0
 										crefs.each {|cn|
 											icnt = 0
-											icnt = icnt + 1 if (!cels1[cn].set?() and Ops.contains?(cels1[cn].pmarks(), num))
-											icnt = icnt + 1 if (!cels2[cn].set?() and Ops.contains?(cels2[cn].pmarks(), num))
-											icnt = icnt + 1 if (!cels3[cn].set?() and Ops.contains?(cels3[cn].pmarks(), num))
+											icnt = icnt + 1 if (!cels1[cn].setBool() and Ops.containsBool(cels1[cn].pmarks(), num))
+											icnt = icnt + 1 if (!cels2[cn].setBool() and Ops.containsBool(cels2[cn].pmarks(), num))
+											icnt = icnt + 1 if (!cels3[cn].setBool() and Ops.containsBool(cels3[cn].pmarks(), num))
 											cnt = cnt + 1 if (icnt >= 2)
 										}
 										next unless cnt == 3
 										cnt = 0
 										Ops.pow(@size, 2).times {|cn|
 											next if cnt > 0
-											next if Ops.contains?(crefs, cn)
-											cnt = cnt + 1 if (!cels1[cn].set?() and Ops.contains?(cels1[cn].pmarks(), num))
-											cnt = cnt + 1 if (!cels2[cn].set?() and Ops.contains?(cels2[cn].pmarks(), num))
-											cnt = cnt + 1 if (!cels3[cn].set?() and Ops.contains?(cels3[cn].pmarks(), num))
+											next if Ops.containsBool(crefs, cn)
+											cnt = cnt + 1 if (!cels1[cn].setBool() and Ops.containsBool(cels1[cn].pmarks(), num))
+											cnt = cnt + 1 if (!cels2[cn].setBool() and Ops.containsBool(cels2[cn].pmarks(), num))
+											cnt = cnt + 1 if (!cels3[cn].setBool() and Ops.containsBool(cels3[cn].pmarks(), num))
 										}
 										next unless (cnt == 0)
 										if rcs.equals(:row)
@@ -1779,7 +1779,7 @@ class SuPuzzle < SuClass
 			XCycle.init(@cells, n)
 			#puts XCycle.reg_s()
 			#puts XCycle.loop_s()
-			if XCycle.loopComplete?()
+			if XCycle.loopCompleteBool()
 				x = XCycle.elimTwoStrongLinks()
 				if ((x != nil) and (x.cells().length > 0))
 					cellElim(x.vals(), x.cells(), x.msg())
@@ -1800,16 +1800,16 @@ class SuPuzzle < SuClass
 	end
 	
 	def guessCheck():void
-		return if gbroken?()
+		return if gbrokenBool()
 		#gcheck()
 		#remainSort()
 		#puts "Fail" unless guesser(0)
 	end
 	
 	def guesser(c:int):boolean
-		return guesser(c + 1) if @cells[@sorted[c]].set?()
+		return guesser(c + 1) if @cells[@sorted[c]].setBool()
 		#gcheck(c, true)
-		if @cells[@sorted[c]].gset?() # @sorted[c]
+		if @cells[@sorted[c]].gsetBool() # @sorted[c]
 			if (gsolved?() or (((c + 1) < @cells.length) and guesser(c + 1)))
 				@cells.length.times {|ic| @cells[@sorted[ic]].setToGuess() if (ic >= c) } unless @guessFail
 				return true
@@ -1817,12 +1817,12 @@ class SuPuzzle < SuClass
 			@cells.length.times {|ic| @cells[@sorted[ic]].greset() if (ic >= c) }
 			return false
 		end
-		while @cells[@sorted[c]].canGuess?()
+		while @cells[@sorted[c]].canGuessBool()
 			@cells.length.times {|ic| @cells[@sorted[ic]].greset() if (ic > c) }
 			@cells[@sorted[c]].nextGuess()
 			gcheck(c + 1, true)
 			#gcheck2(c + 1, true)
-			if gsolved?()
+			if gsolvedBool()
 				@cells.length.times {|ic| @cells[@sorted[ic]].setToGuess() if (ic >= c) }
 				return true
 			end
@@ -1844,7 +1844,7 @@ class SuPuzzle < SuClass
 		return false
 	end
 	
-	def continue?():boolean
+	def continueBool():boolean
 		#puts gpmarks_s()
 		#gprint()
 		#console = System.console()
@@ -1863,7 +1863,7 @@ class SuPuzzle < SuClass
 			if i < @sorted.length
 				@cells.length.times {|c|
 					if i < @sorted.length
-						if ((!used[c]) and (((l == 1) and @cells[c].set?()) or ((l > 1) and (@cells[c].pmarks().length == l))))
+						if ((!used[c]) and (((l == 1) and @cells[c].setBool()) or ((l > 1) and (@cells[c].pmarks().length == l))))
 							@sorted[i] = c
 							used[c] = true
 							i = i + 1
@@ -1879,7 +1879,7 @@ class SuPuzzle < SuClass
 		out = SuCell[@cells.length]
 		n = 0
 		@cells.length.times {|c|
-			next unless (!@cells[c].set?() and (@cells[c].pmarks().length == 2))
+			next unless (!@cells[c].setBool() and (@cells[c].pmarks().length == 2))
 			out[n] = @cells[c]
 			n = n + 1
 		}
@@ -1898,14 +1898,14 @@ class SuPuzzle < SuClass
 		end
 		cnt = 0
 		cels.length.times {|c|
-			next unless (!Ops.contains?(exclude, c) and !cels[c].set?())
-			next if cels[c].eliminated?(num)
+			next unless (!Ops.containsBool(exclude, c) and !cels[c].setBool())
+			next if cels[c].eliminatedBool(num)
 			cnt = cnt + 1
 		}
 		puts message if (@verbose and (cnt > 0))
 		cels.length.times {|c|
-			next unless (!Ops.contains?(exclude, c) and !cels[c].set?())
-			next if cels[c].eliminated?(num)
+			next unless (!Ops.containsBool(exclude, c) and !cels[c].setBool())
+			next if cels[c].eliminatedBool(num)
 			cels[c].eliminate(num)
 			cels[c].check()
 			next unless @verbose
@@ -1919,8 +1919,8 @@ class SuPuzzle < SuClass
 		na.each do |n:int|
 			msg = msg + "\n" + "elim " + n + " from:\n"
 			cels.each {|c:SuCell|
-				next if c.set?()
-				next if c.eliminated?(n)
+				next if c.setBool()
+				next if c.eliminatedBool(n)
 				c.eliminate(n)
 				next unless @verbose
 				cnt = cnt + 1
@@ -1932,7 +1932,7 @@ class SuPuzzle < SuClass
 #			c.set(c.pmarks[0]) if c.pmarks.length == 1
 #			9.times do |i|
 #				n = i + 1
-#				if (box(c.box_id()).onlyCell?(c, n) or (row(c.row_id()).onlyCell?(c, n) or col(c.col_id()).onlyCell?(c, n)))
+#				if (box(c.box_id()).onlyCellBool(c, n) or (row(c.row_id()).onlyCellBool(c, n) or col(c.col_id()).onlyCellBool(c, n)))
 #					c.set(n)
 #					msg = msg + "\n" + "Cell at " + c.brc_s + " is the only cell in it's row, col, or box that can be " + n + ". Set."
 #				end
@@ -1942,62 +1942,62 @@ class SuPuzzle < SuClass
 		#print()
 	end
 	
-	def solved?():boolean
+	def solvedBool():boolean
 		out = true
 		Ops.pow(@size, 2).times {|n| 
-			out = box(n + 1).solved?() if out
-			out = row(n + 1).solved?() if out
-			out = col(n + 1).solved?() if out
+			out = box(n + 1).solvedBool() if out
+			out = row(n + 1).solvedBool() if out
+			out = col(n + 1).solvedBool() if out
 		}
 		out
 	end
 	
-	def gsolved?():boolean
+	def gsolvedBool():boolean
 		out = true
 		Ops.pow(@size, 2).times {|n| 
-			out = box(n + 1).gsolved?() if out
-			out = row(n + 1).gsolved?() if out
-			out = col(n + 1).gsolved?() if out
+			out = box(n + 1).gsolvedBool() if out
+			out = row(n + 1).gsolvedBool() if out
+			out = col(n + 1).gsolvedBool() if out
 		}
 		out
 	end
 	
-	def complete?():boolean
+	def completeBool():boolean
 		out = true
 		Ops.pow(@size, 2).times {|n| 
-			out = box(n + 1).complete?() if out
-			out = row(n + 1).complete?() if out
-			out = col(n + 1).complete?() if out
+			out = box(n + 1).completeBool() if out
+			out = row(n + 1).completeBool() if out
+			out = col(n + 1).completeBool() if out
 		}
 		out
 	end
 	
-	def gcomplete?():boolean
+	def gcompleteBool():boolean
 		out = true
 		Ops.pow(@size, 2).times {|n| 
-			out = box(n + 1).gcomplete?() if out
-			out = row(n + 1).gcomplete?() if out
-			out = col(n + 1).gcomplete?() if out
+			out = box(n + 1).gcompleteBool() if out
+			out = row(n + 1).gcompleteBool() if out
+			out = col(n + 1).gcompleteBool() if out
 		}
 		out
 	end
 	
-	def broken?():boolean
+	def brokenBool():boolean
 		out = true
 		Ops.pow(@size, 2).times {|n| 
-			out = !box(n + 1).broken?() if out
-			out = !row(n + 1).broken?() if out
-			out = !col(n + 1).broken?() if out
+			out = !box(n + 1).brokenBool() if out
+			out = !row(n + 1).brokenBool() if out
+			out = !col(n + 1).brokenBool() if out
 		}
 		!out
 	end
 	
-	def gbroken?():boolean
+	def gbrokenBool():boolean
 		out = true
 		Ops.pow(@size, 2).times {|n| 
-			out = !box(n + 1).gbroken?() if out
-			out = !row(n + 1).gbroken?() if out
-			out = !col(n + 1).gbroken?() if out
+			out = !box(n + 1).gbrokenBool() if out
+			out = !row(n + 1).gbrokenBool() if out
+			out = !col(n + 1).gbrokenBool() if out
 		}
 		!out
 	end

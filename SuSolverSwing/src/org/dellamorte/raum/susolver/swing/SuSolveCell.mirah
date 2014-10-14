@@ -168,7 +168,7 @@ class SuSolveCell < JLayeredPane
 			@valLbl.setVisible(false)
 			@pMarksPanel.setVisible(true)
 			9.times do |i|
-				@pMarkLbls[i].setVisible(Ops.contains?(pMarks(), i + 1))
+				@pMarkLbls[i].setVisible(Ops.containsBool(pMarks(), i + 1))
 			end
 		else
 			@valLbl.setText("" + val())

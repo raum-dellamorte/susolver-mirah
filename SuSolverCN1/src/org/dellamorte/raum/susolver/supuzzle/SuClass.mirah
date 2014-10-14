@@ -14,19 +14,19 @@ class SuClass
 	def size():int; end
 	def to_s():String; end
 	def colour(num:int):String; end
-	def coloured?(num:int):boolean; end
-	def thisColour?(num:int, color:String):boolean; end
+	def colouredBool(num:int):boolean; end
+	def thisColourBool(num:int, color:String):boolean; end
 	def setColour(num:int, color:String):void; end
 	def resetColour(num:int):void; end
 	def resetColours():void; end
-	def guessing?():boolean; end
+	def guessingBool():boolean; end
 	def guessMode(mode:boolean):void; end
 	def setToGuess():void; end
 	def setCell(n:int, cel:SuClass):void; end
 	def cells():SuClass[]; end
 	def eliminate(num:int):void; end
-	def eliminated?(num:int):boolean; end
-	def canSee?(cel:SuClass):boolean; end
+	def eliminatedBool(num:int):boolean; end
+	def canSeeBool(cel:SuClass):boolean; end
 	def box(n:int):SuClass; end
 	def row(n:int):SuClass; end
 	def col(n:int):SuClass; end
@@ -42,31 +42,31 @@ class SuClass
 	def gval():int; end
 	def set(is:int):void; end
 	def gset(n:int):void; end
-	def set?():boolean; end
-	def gset?():boolean; end
-	def canbe?(n:int):boolean; end
-	def gcanbe?(n:int):boolean; end
-	def canbe2?(n:int):boolean; end
-	def gcanbe2?(n:int):boolean; end
-	def onlyCell?(cel:SuClass, num:int):boolean; end
+	def setBool():boolean; end
+	def gsetBool():boolean; end
+	def canbeBool(n:int):boolean; end
+	def gcanbeBool(n:int):boolean; end
+	def canbe2Bool(n:int):boolean; end
+	def gcanbe2Bool(n:int):boolean; end
+	def onlyCellBool(cel:SuClass, num:int):boolean; end
 	def check():void; end
 	def check2():void; end
 	def gcheck():void; end
 	def gcheck2():void; end
 	def pmarks():int[]; end
 	def gpmarks():int[]; end
-	def broken?():boolean; end
-	def gbroken?():boolean; end
-	def complete?():boolean; end
-	def gcomplete?():boolean; end
-	def solved?():boolean; end
-	def gsolved?():boolean; end
+	def brokenBool():boolean; end
+	def gbrokenBool():boolean; end
+	def completeBool():boolean; end
+	def gcompleteBool():boolean; end
+	def solvedBool():boolean; end
+	def gsolvedBool():boolean; end
 	def greset():void; end
-	def canGuess?():boolean; end
+	def canGuessBool():boolean; end
 	def nextGuess():void; end
-	def conflict?(n:int):boolean; end
-	def gconflict?(n:int):boolean; end
-	def conflict2?(cel:SuClass, n:int):boolean; end
-	def gconflict2?(cel:SuClass, n:int):boolean; end
+	def conflictBool(n:int):boolean; end
+	def gconflictBool(n:int):boolean; end
+	def conflict2Bool(cel:SuClass, n:int):boolean; end
+	def gconflict2Bool(cel:SuClass, n:int):boolean; end
 end
 

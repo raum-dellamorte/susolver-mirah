@@ -17,21 +17,21 @@ class Ops
 		return i * pow(i, p - 1)
 	end
 	
-	def self.contains?(a:int[],n:int):boolean
+	def self.containsBool(a:int[],n:int):boolean
 		test = Arrays.copyOf(a, a.length)
 		Arrays.sort(test)
 		return (Arrays.binarySearch(test, n) >= 0)
 	end
 	
-	def self.isSubset?(a1:int[], a2:int[]):boolean
+	def self.isSubsetBool(a1:int[], a2:int[]):boolean
 		return false if (a2.length > a1.length)
 		out = true
-		a2.each {|i| out = (out and contains?(a1, i))}
+		a2.each {|i| out = (out and containsBool(a1, i))}
 		out
 	end
 	
-	def self.aEquals?(a1:int[], a2:int[]):boolean
-		return ((a1.length == a2.length) and isSubset?(a1, a2))
+	def self.aEqualsBool(a1:int[], a2:int[]):boolean
+		return ((a1.length == a2.length) and isSubsetBool(a1, a2))
 	end
 	
 	def self.appendUniq(ray:int[], num:int):int[]
@@ -41,7 +41,7 @@ class Ops
 			return out
 		end
 		Arrays.sort(ray)
-		return ray if contains?(ray, num)
+		return ray if containsBool(ray, num)
 		out = int[ray.length + 1]
 		ray.length.times {|i| out[i] = ray[i] }
 		out[ray.length] = num
@@ -59,7 +59,7 @@ class Ops
 	def self.union(ray1:int[], ray2:int[]):int[]
 		return int[0] if ((ray1.length == 0) or (ray2.length == 0))
 		out = int[0]
-		ray1.length.times {|i| out = appendUniq(out, ray1[i]) if contains?(ray2, ray1[i])}
+		ray1.length.times {|i| out = appendUniq(out, ray1[i]) if containsBool(ray2, ray1[i])}
 		return out
 	end
 	

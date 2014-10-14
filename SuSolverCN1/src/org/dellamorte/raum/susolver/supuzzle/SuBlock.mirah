@@ -36,7 +36,7 @@ class SuBlock < SuClass
 		@cells[n - 1] = SuCell(cel)
 	end
 	
-	def sameCell?(a:SuCell, b:SuCell):boolean
+	def sameCellBool(a:SuCell, b:SuCell):boolean
 		return true if ((a.box_id() == b.box_id()) and ((a.row_id() == b.row_id()) and (a.col_id() == b.col_id())))
 		return false
 	end
@@ -55,7 +55,7 @@ class SuBlock < SuClass
 			out[n] = bx
 			n = n + 1
 		}
-		#puts "boxes fail" if Ops.contains?(out, 0)
+		#puts "boxes fail" if Ops.containsBool(out, 0)
 		return out
 	end
 	
@@ -81,7 +81,7 @@ class SuBlock < SuClass
 				cels = col_a(num)
 			end
 			cels.length.times {|c|
-				return (num) if sameCell?(cel, cels[c])
+				return (num) if sameCellBool(cel, cels[c])
 			}
 		}
 		return 0
@@ -104,7 +104,7 @@ class SuBlock < SuClass
 			cels = @cells
 		end
 		out = 0
-		cels.length.times {|c| out = out + 1 if ((gflag and !cels[c].gset?()) or !cels[c].set?())}
+		cels.length.times {|c| out = out + 1 if ((gflag and !cels[c].gsetBool()) or !cels[c].setBool())}
 		out
 	end
 	
@@ -130,9 +130,9 @@ class SuBlock < SuClass
 		end
 		out = int[0]
 		cels.length.times {|c| 
-			if (gflag and cels[c].gset?())
+			if (gflag and cels[c].gsetBool())
 				out = Ops.appendUniq(out, cels[c].gval)
-			elsif cels[c].set?()
+			elsif cels[c].setBool()
 				out = Ops.appendUniq(out, cels[c].val)
 			end
 		}
@@ -173,13 +173,13 @@ class SuBlock < SuClass
 		end
 		out = int[0]
 		cels.length.times {|c| 
-			if ((gflag and !cels[c].gset?) or !cels[c].set?)
+			if ((gflag and !cels[c].gsetBool) or !cels[c].setBool)
 				if gflag
 					ir = cels[c].gpmarks()
-					puts "gpmarks Fail" if Ops.contains?(ir, 0)
+					puts "gpmarks Fail" if Ops.containsBool(ir, 0)
 				else
 					ir = cels[c].pmarks()
-					puts "pmarks Fail" if Ops.contains?(ir, 0)
+					puts "pmarks Fail" if Ops.containsBool(ir, 0)
 				end
 				ir.length.times {|n| out = Ops.appendUniq(out, ir[n])}
 			end
@@ -211,44 +211,44 @@ class SuBlock < SuClass
 		chunkPMarks(true, :col, n)
 	end
 	
-	def canbeChunk?(gflag:boolean, rowcol:String, rc:int, n:int):boolean
+	def canbeChunkBool(gflag:boolean, rowcol:String, rc:int, n:int):boolean
 		if rowcol.equals(:row)
-			return Ops.contains?(growPMarks(rc), n) if gflag
-			return Ops.contains?(rowPMarks(rc), n)
+			return Ops.containsBool(growPMarks(rc), n) if gflag
+			return Ops.containsBool(rowPMarks(rc), n)
 		elsif rowcol.equals(:col)
-			return Ops.contains?(gcolPMarks(rc), n) if gflag
-			return Ops.contains?(colPMarks(rc), n)
+			return Ops.containsBool(gcolPMarks(rc), n) if gflag
+			return Ops.containsBool(colPMarks(rc), n)
 		else
-			return Ops.contains?(gpmarks(), n) if gflag
-			return Ops.contains?(pmarks(), n)
+			return Ops.containsBool(gpmarks(), n) if gflag
+			return Ops.containsBool(pmarks(), n)
 		end
 	end
 	
-	def valInChunk?(gflag:boolean, rowcol:String, rc:int, n:int):boolean
-		return true if canbeChunk?(gflag, rowcol, rc, n)
-		return Ops.contains?(chunkSet(gflag, rowcol, rc), n)
+	def valInChunkBool(gflag:boolean, rowcol:String, rc:int, n:int):boolean
+		return true if canbeChunkBool(gflag, rowcol, rc, n)
+		return Ops.containsBool(chunkSet(gflag, rowcol, rc), n)
 	end
 	
-	def canbeRow?(rc:int, n:int):boolean
+	def canbeRowBool(rc:int, n:int):boolean
 		canbeChunk?(false, :row, rc, n)
 	end
 	
-	def canbeCol?(rc:int, n:int):boolean
+	def canbeColBool(rc:int, n:int):boolean
 		canbeChunk?(false, :col, rc, n)
 	end
 	
-	def gcanbeRow?(rc:int, n:int):boolean
+	def gcanbeRowBool(rc:int, n:int):boolean
 		canbeChunk?(true, :row, rc, n)
 	end
 	
-	def gcanbeCol?(rc:int, n:int):boolean
+	def gcanbeColBool(rc:int, n:int):boolean
 		canbeChunk?(true, :col, rc, n)
 	end
 	
 	def inChunks(gflag:boolean, rowcol:String, num:int):int[]
 		out = int[0]
 		@size.times {|i|
-			out = Ops.appendUniq(out, i + 1) if valInChunk?(gflag, rowcol, i + 1, num)
+			out = Ops.appendUniq(out, i + 1) if valInChunkBool(gflag, rowcol, i + 1, num)
 		}
 		return out
 	end
@@ -260,7 +260,7 @@ class SuBlock < SuClass
 			bxs = boxes()
 			bxs.length.times {|bxn|
 				rcs = SuBlock(@parent.box(bxn + 1)).inChunks(gflag, rowcol, num)
-				if ((rcs.length > 0) and Ops.contains?(rcs, rc))
+				if ((rcs.length > 0) and Ops.containsBool(rcs, rc))
 					out[n] = bxn + 1 
 					n = n + 1
 				end
@@ -306,88 +306,88 @@ class SuBlock < SuClass
 		onlyChunk(true, :col, num)
 	end
 	
-	def onlyChunk?(rowcol:String, rc:int, num:int):boolean
+	def onlyChunkBool(rowcol:String, rc:int, num:int):boolean
 		onlyChunk(false, rowcol, num) == rc
 	end
 	
-	def gonlyChunk?(rowcol:String, rc:int, num:int):boolean
+	def gonlyChunkBool(rowcol:String, rc:int, num:int):boolean
 		onlyChunk(true, rowcol, num) == rc
 	end
 	
-	def onlyRow?(i:int, num:int):boolean
+	def onlyRowBool(i:int, num:int):boolean
 		onlyChunk?(:row, i, num)
 	end
 	
-	def onlyCol?(i:int, num:int):boolean
+	def onlyColBool(i:int, num:int):boolean
 		onlyChunk?(:col, i, num)
 	end
 	
-	def gonlyRow?(i:int, num:int):boolean
+	def gonlyRowBool(i:int, num:int):boolean
 		gonlyChunk?(:row, i, num)
 	end
 	
-	def gonlyCol?(i:int, num:int):boolean
+	def gonlyColBool(i:int, num:int):boolean
 		gonlyChunk?(:col, i, num)
 	end
 	
-	def conflict?(n:int):boolean
-		return Ops.contains?(boxSet(), n) unless n == 0
+	def conflictBool(n:int):boolean
+		return Ops.containsBool(boxSet(), n) unless n == 0
 		return false
 	end
 	
-	def gconflict?(n:int):boolean
-		return Ops.contains?(gboxSet(), n) unless n == 0
+	def gconflictBool(n:int):boolean
+		return Ops.containsBool(gboxSet(), n) unless n == 0
 		return false
 	end
 	
-	def onlyCell?(cel:SuClass, num:int):boolean
+	def onlyCellBool(cel:SuClass, num:int):boolean
 		cnt = 0
 		@cells.length.times {|c|
-			next if sameCell?(@cells[c], SuCell(cel))
+			next if sameCellBool(@cells[c], SuCell(cel))
 			cnt = cnt + 1
-			return false if ((@cells[c].set?() and (@cells[c].val() == num)) or (!@cells[c].set?() and Ops.contains?(@cells[c].pmarks(), num)))
+			return false if ((@cells[c].setBool() and (@cells[c].val() == num)) or (!@cells[c].setBool() and Ops.containsBool(@cells[c].pmarks(), num)))
 			#puts "onlyCell? " + num + " " + @cells[c].to_s() if (cnt == (@cells.length - 1))
 		}
 		puts "onlyCell? error: counted all cells" if cnt == @cells.length
 		return true
 	end
 	
-	def complete?():boolean
-		Ops.pow(@size, 2).times {|n| return false if !@cells[n].set?() }
+	def completeBool():boolean
+		Ops.pow(@size, 2).times {|n| return false if !@cells[n].setBool() }
 		return true
 	end
 	
-	def gcomplete?():boolean
-		Ops.pow(@size, 2).times {|n| return false if !@cells[n].gset?() }
+	def gcompleteBool():boolean
+		Ops.pow(@size, 2).times {|n| return false if !@cells[n].gsetBool() }
 		return true
 	end
 	
-	def solved?():boolean
-		return false unless complete?()
+	def solvedBool():boolean
+		return false unless completeBool()
 		tmp = int[Ops.pow(@size, 2)]
 		Ops.pow(@size, 2).times {|n| val = @cells[n].val - 1; tmp[val] = tmp[val] + 1 if (val >= 0) }
 		Ops.pow(@size, 2).times {|n| return false if (tmp[n] != 1) }
 		return true
 	end
 	
-	def gsolved?():boolean
-		return false unless gcomplete?()
+	def gsolvedBool():boolean
+		return false unless gcompleteBool()
 		tmp = int[Ops.pow(@size, 2)]
 		Ops.pow(@size, 2).times {|n| val = @cells[n].gval - 1; tmp[val] = tmp[val] + 1 if (val >= 0) }
 		Ops.pow(@size, 2).times {|n| return false if (tmp[n] != 1) }
 		return true
 	end
 	
-	def broken?():boolean
-		@cells.length.times {|c| return true if @cells[c].broken?() }
+	def brokenBool():boolean
+		@cells.length.times {|c| return true if @cells[c].brokenBool() }
 		tmp = int[Ops.pow(@size, 2)]
 		Ops.pow(@size, 2).times {|n| val = @cells[n].val - 1; tmp[val] = tmp[val] + 1 if (val >= 0) }
 		Ops.pow(@size, 2).times {|n| return true unless (tmp[n] < 2) }
 		return false
 	end
 	
-	def gbroken?():boolean
-		@cells.length.times {|c| return true if @cells[c].gbroken?() }
+	def gbrokenBool():boolean
+		@cells.length.times {|c| return true if @cells[c].gbrokenBool() }
 		tmp = int[Ops.pow(@size, 2)]
 		Ops.pow(@size, 2).times {|n| val = @cells[n].gval - 1; tmp[val] = tmp[val] + 1 if (val >= 0) }
 		Ops.pow(@size, 2).times {|n| return true unless (tmp[n] < 2) }

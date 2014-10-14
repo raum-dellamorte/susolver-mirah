@@ -47,7 +47,7 @@ class SuCell < SuClass
 	end
 	
 	def to_s():String
-		if set?() and @elim.length < 9
+		if setBool() and @elim.length < 9
 			9.times {|i|
 				n = i + 1
 				@elim = Ops.appendUniq(@elim, n) # unless n == @is
@@ -61,7 +61,7 @@ class SuCell < SuClass
 				" used: " + Arrays.toString(@gused)
 	end
 	
-	def guessing?():boolean
+	def guessingBool():boolean
 		@guessing
 	end
 	
@@ -88,10 +88,10 @@ class SuCell < SuClass
 		#puts "Eliminated " + num + " from " + to_s()
 	end
 	
-	def eliminated?(num:int):boolean
+	def eliminatedBool(num:int):boolean
 		return true if (set?() and (num != @is))
 		return false if ((@guessing and (@glim.length == 0)) or (!@guessing and (@elim.length == 0)))
-		return ((@guessing and Ops.contains?(@glim, num)) or (!@guessing and Ops.contains?(@elim, num)))
+		return ((@guessing and Ops.containsBool(@glim, num)) or (!@guessing and Ops.containsBool(@elim, num)))
 	end
 	
 	def box_id():int
@@ -135,7 +135,7 @@ class SuCell < SuClass
 	end
 	
 	def gval():int
-		return val() if set?()
+		return val() if setBool()
 		return @guess
 	end
 	
@@ -149,18 +149,18 @@ class SuCell < SuClass
 	end
 	
 	def setToGuess():void
-		set(@guess) if (!set?() and gset?())
+		set(@guess) if (!set?() and gsetBool())
 	end
 	
-	def set?():boolean
+	def setBool():boolean
 		@is != 0
 	end
 	
-	def gset?():boolean
+	def gsetBool():boolean
 		set?() or (@guess != 0)
 	end
 	
-	def canSee?(cel:SuClass):boolean
+	def canSeeBool(cel:SuClass):boolean
 		return false if ((@box == SuCell(cel).box_id) and ((@row == SuCell(cel).row_id) and (@col == SuCell(cel).col_id)))
 		return true if ((@box == SuCell(cel).box_id) or ((@row == SuCell(cel).row_id) or (@col == SuCell(cel).col_id)))
 	end
@@ -168,25 +168,25 @@ class SuCell < SuClass
 	def check():void; end # deprecated
 	
 	def gcheck():void
-		return if gset?()
+		return if gsetBool()
 		s1 = "1"
 		s2 = "2"
 		until s2.equals(s1)
 			s1 = to_s()
 			gcalcPMarks()
 			nextGuess() if @gpmarks.length == 1
-			return if (gset?() or gbroken?())
+			return if (gset?() or gbrokenBool())
 			s2 = to_s()
 		end
 	end
 	
 	def pmarks():int[]
 		#@pmarks
-		return int[0] if set?
+		return int[0] if setBool
 		npm = int[0]
 		9.times do |i|
 			n = i + 1
-			npm = Ops.appendUniq(npm, n) unless Ops.contains?(@elim, n)
+			npm = Ops.appendUniq(npm, n) unless Ops.containsBool(@elim, n)
 		end
 		return npm
 	end
@@ -198,46 +198,46 @@ class SuCell < SuClass
 	def calcPMarks():void; end # deprecated
 	
 	def gcalcPMarks():void
-		return if gset?()
+		return if gsetBool()
 		out = int[Ops.pow(@size, 2)]
 		n = 0
 		Ops.pow(@size, 2).times do |i| 
-			if Ops.contains?(pmarks(), i + 1)
-				if gcanbe?(i + 1)
+			if Ops.containsBool(pmarks(), i + 1)
+				if gcanbeBool(i + 1)
 					out[n] = i + 1
 					n = n + 1
 				end
 			end
 		end
-		if ((n == 0) or set?())
+		if ((n == 0) or setBool())
 			@gpmarks = int[0]
 		else
 			@gpmarks = Arrays.copyOfRange(out, 0, n)
 		end
 	end
 	
-	def canbe?(n:int):boolean
+	def canbeBool(n:int):boolean
 		return false if (n == 0)
 		return !eliminated?(n)
 	end
 	
-	def gcanbe?(n:int):boolean
+	def gcanbeBool(n:int):boolean
 		return false if (n == 0)
 		if @gused.length == 0
 			g = false
 		else
-			g = Ops.contains?(@gused, n)
+			g = Ops.containsBool(@gused, n)
 		end
-		return !(g or eliminated?(n))
+		return !(g or eliminatedBool(n))
 	end
 	
 	def setIfOnlyCell():void
 		return if (set?() or (pmarks().length == 0))
 		pmarks().length.times {|i|
 			#puts "" + pmarks().length + " " + i
-			x = @parent.box(@box).onlyCell?(SuClass(self), pmarks()[i])
-			y = @parent.row(@row).onlyCell?(SuClass(self), pmarks()[i])
-			z = @parent.col(@col).onlyCell?(SuClass(self), pmarks()[i])
+			x = @parent.box(@box).onlyCellBool(SuClass(self), pmarks()[i])
+			y = @parent.row(@row).onlyCellBool(SuClass(self), pmarks()[i])
+			z = @parent.col(@col).onlyCellBool(SuClass(self), pmarks()[i])
 			all = (x or (y or z))
 			#puts "" + x + " " + y + " " + z + " " + all
 			if all
@@ -248,13 +248,13 @@ class SuCell < SuClass
 		}
 	end
 	
-	def broken?():boolean
-		return false if set?()
+	def brokenBool():boolean
+		return false if setBool()
 		pmarks().length == 0
 	end
 	
-	def gbroken?():boolean
-		return false if gset?()
+	def gbrokenBool():boolean
+		return false if gsetBool()
 		@gpmarks.length == 0
 	end
 	
@@ -264,14 +264,14 @@ class SuCell < SuClass
 		@gpmarks = Arrays.copyOf(pmarks(), pmarks().length)
 	end
 	
-	def canGuess?():boolean
-		return false if set?()
+	def canGuessBool():boolean
+		return false if setBool()
 		#gcheck()
 		return @gpmarks.length > 0
 	end
 	
 	def nextGuess():void
-		return if set?()
+		return if setBool()
 		x = Arrays.copyOf(@gpmarks, @gpmarks.length)
 		if x.length > 0
 			@guess = x[0]

@@ -139,7 +139,7 @@ class SuSolveCell < Component
 	end
 	
 	def canBe(n:int):boolean
-		return !@suCell.eliminated?(n) unless (@suCell == nil)
+		return !@suCell.eliminatedBool(n) unless (@suCell == nil)
 		return true
 	end
 	

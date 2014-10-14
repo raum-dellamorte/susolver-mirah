@@ -303,14 +303,14 @@ class SuWindow
 			SuWindow.createAndShowGui()
 		end
 		begin
-			SuWindow.loadEntry() if SuWindow.canLoadEntry?()
+			SuWindow.loadEntry() if SuWindow.canLoadEntryBool()
 		rescue
 			
 		end
 	end
 	
 	def self.nextStepClicked(e:ActionEvent):void
-		@@solvePanel.import(@entryPanel.export()) unless @@solvePanel.imported?()
+		@@solvePanel.import(@entryPanel.export()) unless @@solvePanel.importedBool()
 		@@solvePanel.nextStep()
 		SuWindow.updateSolvePanel()
 	end
@@ -400,7 +400,7 @@ class SuWindow
 		@@entryPanel.import(ia)
 	end
 	
-	def self.canLoadEntry?():boolean
+	def self.canLoadEntryBool():boolean
 		fl = File.new("savedSudoku.txt")
 		return (fl.exists() and !fl.isDirectory())
 	end

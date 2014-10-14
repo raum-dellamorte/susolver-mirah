@@ -103,11 +103,11 @@ class SuEntryBlock < JPanel
 	end
 	
 	def hasRow(n:int):boolean
-		Ops.contains?(rows(), n)
+		Ops.containsBool(rows(), n)
 	end
 	
 	def hasCol(n:int):boolean
-		Ops.contains?(cols(), n)
+		Ops.containsBool(cols(), n)
 	end
 	
 	

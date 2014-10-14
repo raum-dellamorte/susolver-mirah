@@ -119,7 +119,7 @@ class SuSolvePuzzle < JPanel
 		@imported = tf
 	end
 	
-	def imported?():boolean
+	def importedBool():boolean
 		@imported
 	end
 	
