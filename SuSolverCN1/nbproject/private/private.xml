@@ -4,9 +4,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/gdrive/projects/dev/git/susolver-mirah/SuSolverCN1/src/org/dellamorte/raum/susolver/cn1/SuSolveCell.mirah</file>
-            <file>file:/D:/gdrive/projects/dev/git/susolver-mirah/SuSolverCN1/src/org/dellamorte/raum/susolver/cn1/SuEntryCell.mirah</file>
-            <file>file:/D:/gdrive/projects/dev/git/susolver-mirah/SuSolverCN1/src/org/dellamorte/raum/susolver/cn1/SuSolverGui.mirah</file>
+            <file>file:/D:/gdrive/projects/dev/git/susolver-mirah/SuSolverCN1/src/org/dellamorte/raum/susolver/supuzzle/SuBlock.mirah</file>
+            <file>file:/D:/gdrive/projects/dev/git/susolver-mirah/SuSolverCN1/src/org/dellamorte/raum/susolver/supuzzle/SuPuzzle.mirah</file>
+            <file>file:/D:/gdrive/projects/dev/git/susolver-mirah/SuSolverCN1/src/org/dellamorte/raum/susolver/supuzzle/SuCell.mirah</file>
+            <file>file:/D:/gdrive/projects/dev/git/susolver-mirah/SuSolverCN1/src/org/dellamorte/raum/susolver/supuzzle/Ops.mirah</file>
         </group>
     </open-files>
 </project-private>

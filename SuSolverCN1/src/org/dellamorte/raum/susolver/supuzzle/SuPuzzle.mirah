@@ -6,9 +6,11 @@
 
 package org.dellamorte.raum.susolver.supuzzle
 
-import java.util.Arrays
 import java.util.ArrayList
-import java.io.Console
+import java.lang.String
+#import java.io.Console
+import me.regexp.RE
+import com.codename1.util.StringUtil
 
 #import Ops
 #import SuClass
@@ -112,12 +114,12 @@ class SuPuzzle < SuClass
 		
 		def self.findStrongLinks():void
 			return if @@cels.length == 0
-			@@cels.length.times {|oci|
-				@@cels.length.times {|ici|
+			@@cels.length.times {|oci:int|
+				@@cels.length.times {|ici:int|
 					next unless ici > oci
-					c1 = @@cels[oci]
-					c2 = @@cels[ici]
-					next unless c1.canSeeBool(SuClass(c2))
+					c1 = SuCell(@@cels[oci])
+					c2 = SuCell(@@cels[ici])
+					next unless c1.canSeeBool( SuClass(c2) )
 					test = false
 					@@cels.length.times {|tci|
 						next if tci == oci
@@ -994,9 +996,9 @@ class SuPuzzle < SuClass
 			ra = rowCells()
 			ca = colCells()
 #			puts to_s()
-#			puts Arrays.toString(ba) + " Length: " + ba.length
-#			puts Arrays.toString(ra) + " Length: " + ra.length
-#			puts Arrays.toString(ca) + " Length: " + ca.length
+#			puts Ops.toString(ba) + " Length: " + ba.length
+#			puts Ops.toString(ra) + " Length: " + ra.length
+#			puts Ops.toString(ca) + " Length: " + ca.length
 #			return unless continueBool()
 			if ba.length == 1
 				@boxNbr = Chain.getCell(ba[0])
@@ -1134,6 +1136,14 @@ class SuPuzzle < SuClass
 		@stepMax = 11
 	end
 	
+	def self.copyOfRange(original:SuCell[], from:int, to:int):SuCell[]
+		newLength = (to - from)
+		(return SuCell[0]) if (newLength < 0)
+		copy = SuCell[newLength]
+		System.arraycopy(Object[].cast(original), from, Object[].cast(copy), 0, Math.min((original.length - from), newLength))
+		return SuCell[].cast(copy)
+	end
+	
 	def calcBox(r:int, c:int):int
 		r = r + 1 until ((r % @size) == 0)
 		r = r / @size
@@ -1155,7 +1165,7 @@ class SuPuzzle < SuClass
 		cel = 0
 		cel = cel + 1 until (((SuCell(@cells[cel]).row_id == r) and (SuCell(@cells[cel]).col_id == c)) or (@cells.length <= cel))
 		return @cells[cel] unless (@cells.length <= cel)
-		return SuCell.new(SuClass(self))
+		return SuCell(SuCell.new(SuClass(self)))
 	end
 	
 	def cells():SuCell[]
@@ -1172,21 +1182,16 @@ class SuPuzzle < SuClass
 	
 	def setCells(cstr:String):void
 		sz = Ops.pow(@size, 4)
-		tmp = String[].cast(cstr.replaceAll("[^0-9 ]", "").replaceAll("  +"," ").split(" "))
+		tmp = Ops.strToIntArray(cstr)
 		return unless (tmp.length == sz)
 		test = true
-		n = Ops.pow(@size, 2)
-		tmp.each do |s:String|
+		m = Ops.pow(@size, 2)
+		tmp.each do |n:int|
 			next unless test
-			i = Integer.parseInt(s)
-			test = ((i > (-1)) and (i <= n))
+			test = ((n >= 0) and (n <= m))
 		end
 		return unless test
-		itmp = int[sz]
-		sz.times do |i:int|
-			itmp[i] = Integer.parseInt(tmp[i])
-		end
-		setCells(itmp)
+		setCells(tmp)
 	end
 	
 	def setCells(ns:int[]):void
@@ -1447,7 +1452,7 @@ class SuPuzzle < SuClass
 					elimGrp.add(c)
 				end
 				na = c1.pmarks()
-				cellElim(na, elimGrp.toArray(SuCell[0]), "Naked Pair: " + Arrays.toString(na)) if elimGrp.size > 0
+				cellElim(na, elimGrp.toArray(SuCell[0]), "Naked Pair: " + Ops.toString(na)) if elimGrp.size > 0
 			}
 		}
 	end
@@ -1486,7 +1491,7 @@ class SuPuzzle < SuClass
 					}
 					next unless ((exclude.length > 1) and (ocr.length == exclude.length))
 					ocr.length.times {|i|
-						brcElim(brcs[ibrc], (brci + 1), ocr[i], exclude, "Naked Group: " + Arrays.toString(ocr), gflag)
+						brcElim(brcs[ibrc], (brci + 1), ocr[i], exclude, "Naked Group: " + Ops.toString(ocr), gflag)
 					}
 				}
 			}
@@ -1758,9 +1763,9 @@ class SuPuzzle < SuClass
 											sfcols = Ops.appendUniq(sfcols, cels2[cn].col_id)
 											sfcols = Ops.appendUniq(sfcols, cels3[cn].col_id)
 										}
-										brcElim(rcs, c1 + 1, num, excluded, "Swordfish: " + num + " r" + Arrays.toString(sfrows) + "c" + Arrays.toString(sfcols), gflag)
-										brcElim(rcs, c2 + 1, num, excluded, "Swordfish: " + num + " r" + Arrays.toString(sfrows) + "c" + Arrays.toString(sfcols), gflag)
-										brcElim(rcs, c3 + 1, num, excluded, "Swordfish: " + num + " r" + Arrays.toString(sfrows) + "c" + Arrays.toString(sfcols), gflag)
+										brcElim(rcs, c1 + 1, num, excluded, "Swordfish: " + num + " r" + Ops.toString(sfrows) + "c" + Ops.toString(sfcols), gflag)
+										brcElim(rcs, c2 + 1, num, excluded, "Swordfish: " + num + " r" + Ops.toString(sfrows) + "c" + Ops.toString(sfcols), gflag)
+										brcElim(rcs, c3 + 1, num, excluded, "Swordfish: " + num + " r" + Ops.toString(sfrows) + "c" + Ops.toString(sfcols), gflag)
 									}
 								}
 							}
@@ -1872,7 +1877,7 @@ class SuPuzzle < SuClass
 				}
 			end
 		}
-		#puts Arrays.toString(@sorted)
+		#puts Ops.toString(@sorted)
 	end
 	
 	def twoRemain():SuCell[]
@@ -1884,7 +1889,7 @@ class SuPuzzle < SuClass
 			n = n + 1
 		}
 		return SuCell[0] if n == 0
-		return SuCell[].cast(Arrays.copyOfRange(Object[].cast(out), 0, n))
+		return SuPuzzle.copyOfRange(out, 0, n)
 		#return out.range(:SuCell, 0, n)
 	end
 	

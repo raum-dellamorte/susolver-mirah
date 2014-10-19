@@ -5,7 +5,7 @@
  */
 
 package org.dellamorte.raum.susolver.supuzzle
-import java.util.Arrays
+
 import java.util.ArrayList
 
 #import Ops
@@ -61,7 +61,7 @@ class SuBlock < SuClass
 	
 	def row_a(n:int):SuCell[]
 		return SuCell[0] if ((n < 1) or (n > @size))
-		return SuCell[].cast(Arrays.copyOfRange(Object[].cast(@cells), (@size * (n - 1)), (@size * n)))
+		return SuPuzzle.copyOfRange(@cells, (@size * (n - 1)), (@size * n))
 	end
 	
 	def col_a(n:int):SuCell[]
@@ -266,7 +266,7 @@ class SuBlock < SuClass
 				end
 			}
 			return int[0] if n == 0
-			return Arrays.copyOfRange(out, 0, n)
+			return Ops.copyOfRange(out, 0, n)
 		else
 			return int[0]
 		end

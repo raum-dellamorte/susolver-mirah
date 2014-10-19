@@ -1,0 +1,1 @@
+puts `mirah -cp .;.\\dist\\SuSolverCN1.jar;.\\org\\dellamorte\\raum\\susolver\\supuzzle SuRun.mirah`

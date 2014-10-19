@@ -6,7 +6,6 @@
 
 package org.dellamorte.raum.susolver.supuzzle
 
-import java.util.Arrays
 import java.util.ArrayList
 	
 #import Ops
@@ -55,10 +54,10 @@ class SuCell < SuClass
 		end
 		return 	"" + brc_s() + 
 				" val: " + @is + " " + 
-				Arrays.toString(pmarks()) + 
-				" elim: " + Arrays.toString(@elim) + 
-				" guess: " + @guess + " " + Arrays.toString(@gpmarks) + 
-				" used: " + Arrays.toString(@gused)
+				Ops.toString(pmarks()) + 
+				" elim: " + Ops.toString(@elim) + 
+				" guess: " + @guess + " " + Ops.toString(@gpmarks) + 
+				" used: " + Ops.toString(@gused)
 	end
 	
 	def guessingBool():boolean
@@ -212,7 +211,7 @@ class SuCell < SuClass
 		if ((n == 0) or setBool())
 			@gpmarks = int[0]
 		else
-			@gpmarks = Arrays.copyOfRange(out, 0, n)
+			@gpmarks = Ops.copyOfRange(out, 0, n)
 		end
 	end
 	
@@ -261,7 +260,7 @@ class SuCell < SuClass
 	def greset():void
 		@guess = 0
 		@gused = int[0]
-		@gpmarks = Arrays.copyOf(pmarks(), pmarks().length)
+		@gpmarks = Ops.copyOf(pmarks(), pmarks().length)
 	end
 	
 	def canGuessBool():boolean
@@ -272,7 +271,7 @@ class SuCell < SuClass
 	
 	def nextGuess():void
 		return if setBool()
-		x = Arrays.copyOf(@gpmarks, @gpmarks.length)
+		x = Ops.copyOf(@gpmarks, @gpmarks.length)
 		if x.length > 0
 			@guess = x[0]
 			sz = @gused.length
@@ -281,7 +280,7 @@ class SuCell < SuClass
 			tmp[sz] = x[0]
 			@gused = tmp
 			if x.length > 1
-				@gpmarks = Arrays.copyOfRange(x, 1, x.length)
+				@gpmarks = Ops.copyOfRange(x, 1, x.length)
 			else
 				@gpmarks = int[0]
 			end
