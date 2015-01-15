@@ -38,7 +38,7 @@
       <artifactId>mirah-tmp-classes</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>system</scope>
-      <systemPath>D:\gdrive\projects\dev\git\susolver-mirah\SuSolverSwing\lib\mirah-tmp-classes.jar</systemPath>
+      <systemPath>${basedir}/lib/mirah-tmp-classes.jar</systemPath>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -46,7 +46,7 @@
       <artifactId>mirah-tmp-classes-test</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>system</scope>
-      <systemPath>D:\gdrive\projects\dev\git\susolver-mirah\SuSolverSwing\lib\mirah-tmp-classes-test.jar</systemPath>
+      <systemPath>${basedir}/lib/mirah-tmp-classes-test.jar</systemPath>
       <optional>true</optional>
     </dependency>
   </dependencies>
