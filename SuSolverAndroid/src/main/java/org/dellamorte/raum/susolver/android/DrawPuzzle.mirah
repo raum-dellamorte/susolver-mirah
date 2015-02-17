@@ -31,22 +31,42 @@ class DrawPuzzle < View
 		context.getTheme().resolveAttribute(android::R::attr.actionBarSize, tv, true)
 		@abh = getResources().getDimensionPixelSize(tv.resourceId)
 		@guiPuz = SuGuiPuzzle.newPuzzle()
+		@bg = Rect.new()
+		@bgC = Paint.new()
+		@bgC.setColor(Color.rgb(200, 200, 200))
+		@bgC.setStyle(Paint.Style.FILL)
+		@bgC.setAlpha(255)
+		Btns.init()
+		gp = @guiPuz
+		@returnBtn = Btns.create("Entry Mode") {
+			gp.commit(false)
+		}
+		@solverBtn = Btns.create("Solve Mode") {
+			gp.commit()
+		}
+		@saveBtn = Btns.create("Save") {
+			
+		}
+		@loadBtn = Btns.create("Load") {
+			
+		}
+		@solveBtn = Btns.create("Solve") {
+			
+		}
+		@nextBtn = Btns.create("Next") {
+			
+		}
 	end
 	
 	$Override
 	def onDraw(canvas:Canvas):void
 		super
 		updateSizeAndOffset()
-		@bg = Rect.new()
+		# left, top, right, bottom
+		@bg.set(0, 0, @size, @size)
 		xT = float(0.0 + ((!@wide) ? 0 : @offset))
 		yT = float(0.0 + ((@wide) ? 0 : @offset))
 		canvas.translate(xT,yT)
-		# left, top, right, bottom
-		@bg.set(0, 0, @size, @size)
-		@bgC = Paint.new()
-		@bgC.setColor(Color.rgb(200, 200, 200))
-		@bgC.setStyle(Paint.Style.FILL)
-		@bgC.setAlpha(255)
 		canvas.drawRect(@bg, @bgC)
 		@guiPuz.gen()
 		scl = float(@size) / float(1010)
@@ -71,31 +91,24 @@ class DrawPuzzle < View
 	def drawButtons(canvas:Canvas):void
 		btnMW = ((@wide) ? @offset : @size)
 		btnMH = ((@wide) ? @size : @offset)
+		xS = ((@wide) ? btnMW - 5 : int(btnMW / 2) - 2)
+		yS = ((@wide) ? int(btnMH / 2) - 2 : btnMH - 5)
 		if @guiPuz.solveMode()
-			
-		else
-			xS = ((@wide) ? btnMW - 5 : int(btnMW / 2) - 2)
-			yS = ((@wide) ? int(btnMH / 2) - 2 : btnMH - 5)
-			@saveBtn = BtnTxt.new(0, 0, xS, yS, "Save")
-			@saveBtn.setAction() {
-				
-			}
-			@saveBtn.drawBtn(canvas)
-			xT = ((@wide) ? 0 : int(btnMW / 2) + 2)
-			yT = ((@wide) ? int(btnMH / 2) + 2 : 0)
-			@loadBtn = BtnTxt.new(xT, yT, xS, yS, "Load")
-			@loadBtn.setAction() {
-				
-			}
-			@loadBtn.drawBtn(canvas)
+			Btn(Btns.get(@returnBtn)).drawBtn(canvas, 0, 0, btnMW, btnMH - 5)
 			xT = ((@wide) ? @size + @offset + 5 : 0)
 			yT = ((@wide) ? 0 : @size + @offset + 5)
-			@solveBtn = BtnTxt.new(xT, yT, btnMW, btnMH - 5, "Solve Mode")
-			gp = @guiPuz
-			@solveBtn.setAction() {
-				gp.commit()
-			}
-			@solveBtn.drawBtn(canvas)
+			Btn(Btns.get(@solveBtn)).drawBtn(canvas, 0, 0, xS, yS)
+			xT = ((@wide) ? 0 : int(btnMW / 2) + 2)
+			yT = ((@wide) ? int(btnMH / 2) + 2 : 0)
+			Btn(Btns.get(@nextBtn)).drawBtn(canvas, xT, yT, xS, yS)
+		else
+			Btn(Btns.get(@solverBtn)).drawBtn(canvas, 0, 0, btnMW, btnMH - 5)
+			xT = ((@wide) ? @size + @offset + 5 : 0)
+			yT = ((@wide) ? 0 : @size + @offset + 5)
+			Btn(Btns.get(@saveBtn)).drawBtn(canvas, xT, yT, xS, yS)
+			xT = xT + ((@wide) ? 0 : int(btnMW / 2) + 2)
+			yT = yT + ((@wide) ? int(btnMH / 2) + 2 : 0)
+			Btn(Btns.get(@loadBtn)).drawBtn(canvas, xT, yT, xS, yS)
 		end
 	end
 	
@@ -108,7 +121,7 @@ class DrawPuzzle < View
 		if ((a > @offset) and (a < (@size + @offset)))
 			cellBtn(x,y)
 		else
-			@solveBtn.click(x,y)
+			Btns.buttons().each {|btn:Btn| btn.click(x,y) }
 		end
 		invalidate()
 		return true
@@ -129,35 +142,61 @@ class DrawPuzzle < View
 		return ((rw * 9) + cl)
 	end
 	
-	class Buttons
+	class Btns
 		def self.init():void
-			
+			@@btns = Btn[0]
+			@@lbls = String[0]
 		end
 		
+		def self.create(txt:String, act:Click):int
+			tmp = Btn.new(txt)
+			tmp.setAction(act)
+			pos = @@btns.length
+			Btns.add(tmp)
+			return pos
+		end
 		
+		def self.add(btn:Btn):void
+			tmp = Btn[@@btns.length + 1]
+			@@btns.length.times do |i:int|
+				tmp[i] = @@btns[i]
+			end
+			tmp[@@btns.length] = btn
+			@@btns = tmp
+		end
+		
+		def self.buttons():Btn[]
+			@@btns
+		end
+		
+		def self.get(i:int):Btn
+			return @@btns[i] unless ((i < 0) or (i >= @@btns.length))
+			return Btn.new("")
+		end
+		
+		def self.get(str:String):Btn
+			out = Btn(nil)
+			@@btns.each do |btn:Btn|
+				next unless Btn(btn).getText().equals(str)
+				out = Btn(btn)
+			end
+			return Btn(out)
+		end
 	end
 	
-	class BtnTxt
-		def initialize(xTran:int, yTran:int, btnMW:int, btnMH:int, string = ""):void
-			@xT = xTran
-			@yT = yTran
+	class Btn
+		def initialize(string = ""):void
 			@pnt = Paint.new()
 			@tf = Typeface(Typeface.create("Courier New",Typeface.BOLD))
 			@pnt.setColor(Color.rgb(5, 5, 5))
 			@pnt.setStyle(Paint.Style.FILL)
 			@pnt.setTypeface(@tf)
-			@bw = btnMW
-			@bh = btnMH
-			@wide = (@bw > @bh)
-			@sz = int((@bh - int(@bh / 32)) / 2)
 			@brdP = Paint.new()
 			@brdP.setColor(Color.rgb(200, 200, 200))
 			@brdP.setStyle(Paint.Style.FILL)
 			@brdP.setAlpha(255)
 			@brdr = Rect.new()
-			@brdr.set(0,0,@bw, @bh)
 			@bg = Rect.new()
-			@bg.set(5,5,@bw - 5, @bh - 5)
 			@bgP = Paint.new()
 			@bgP.setColor(Color.rgb(50, 30, 50))
 			@bgP.setStyle(Paint.Style.FILL)
@@ -167,7 +206,6 @@ class DrawPuzzle < View
 		
 		def setText(string:String):void
 			@str = string
-			recalcSize()
 		end
 		
 		def setBrdrClr(r:int,g:int,b:int):void
@@ -235,7 +273,16 @@ class DrawPuzzle < View
 			end
 		end
 		
-		def drawBtn(canvas:Canvas):void
+		def drawBtn(canvas:Canvas, xTran:int, yTran:int, btnMW:int, btnMH:int):void
+			@xT = xTran
+			@yT = yTran
+			@bw = btnMW
+			@bh = btnMH
+			@wide = (@bw > @bh)
+			@sz = int((@bh - int(@bh / 32)) / 2)
+			recalcSize()
+			@brdr.set(0,0,@bw, @bh)
+			@bg.set(5,5,@bw - 5, @bh - 5)
 			canvas.translate(@xT,@yT)
 			canvas.drawRect(@brdr, @brdP)
 			canvas.drawRect(@bg, @bgP)
@@ -250,6 +297,7 @@ class DrawPuzzle < View
 		end
 		
 		def click(xC:float, yC:float):void
+			return if ((@bw * @bh) == 0)
 			return unless (((xC > @xT) and (xC < (@xT + @w))) and ((yC > @yT) and (y < (@yT + @h))))
 			# run lamda
 			@action.onClick()
@@ -313,9 +361,11 @@ class DrawPuzzle < View
 			return SuCell(nil)
 		end
 		
-		def commit():void
-			
-			@solveMode = true
+		def commit(sm = true):void
+			if sm
+				
+			end
+			@solveMode = sm
 		end
 		
 		def refresh():void
