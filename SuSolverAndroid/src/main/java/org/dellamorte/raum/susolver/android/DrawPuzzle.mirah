@@ -36,25 +36,33 @@ class DrawPuzzle < View
 		@bgC.setColor(Color.rgb(200, 200, 200))
 		@bgC.setStyle(Paint.Style.FILL)
 		@bgC.setAlpha(255)
-		Btns.init()
+		@curScreen = :entry
+		Btns.init(context)
+		dp = self
 		gp = @guiPuz
-		@returnBtn = Btns.create("Entry Mode") {
-			gp.commit(false)
-		}
-		@solverBtn = Btns.create("Solve Mode") {
+		@solverBtn = Btns.create("Solve Mode", :entry) {
+			#Toast.makeText(context, "Clicked Solve Mode", Toast.LENGTH_SHORT).show()
 			gp.commit()
 		}
-		@saveBtn = Btns.create("Save") {
+		@saveBtn = Btns.create("Save", :entry) {
+			#Toast.makeText(context, "Clicked Save", Toast.LENGTH_SHORT).show()
 			
 		}
-		@loadBtn = Btns.create("Load") {
+		@loadBtn = Btns.create("Load", :entry) {
+			#Toast.makeText(context, "Clicked Load", Toast.LENGTH_SHORT).show()
 			
 		}
-		@solveBtn = Btns.create("Solve") {
-			
+		@returnBtn = Btns.create("Entry Mode", :solver) {
+			#Toast.makeText(context, "Clicked Entry Mode", Toast.LENGTH_SHORT).show()
+			gp.commit(false)
 		}
-		@nextBtn = Btns.create("Next") {
-			
+		@solveBtn = Btns.create("Solve", :solver) {
+			#Toast.makeText(context, "Clicked Solve", Toast.LENGTH_SHORT).show()
+			gp.solve()
+		}
+		@nextBtn = Btns.create("Next", :solver) {
+			#Toast.makeText(context, "Clicked Next", Toast.LENGTH_SHORT).show()
+			gp.nextStep()
 		}
 	end
 	
@@ -78,6 +86,10 @@ class DrawPuzzle < View
 		drawButtons(canvas)
 	end
 	
+	def setScreen(scrn:String):void
+		@curScreen = scrn
+	end
+	
 	def updateSizeAndOffset():void
 		sizeP = Point.new()
 		@display.getSize(sizeP)
@@ -94,14 +106,16 @@ class DrawPuzzle < View
 		xS = ((@wide) ? btnMW - 5 : int(btnMW / 2) - 2)
 		yS = ((@wide) ? int(btnMH / 2) - 2 : btnMH - 5)
 		if @guiPuz.solveMode()
+			Btns.visScreen(:solver)
 			Btn(Btns.get(@returnBtn)).drawBtn(canvas, 0, 0, btnMW, btnMH - 5)
 			xT = ((@wide) ? @size + @offset + 5 : 0)
 			yT = ((@wide) ? 0 : @size + @offset + 5)
-			Btn(Btns.get(@solveBtn)).drawBtn(canvas, 0, 0, xS, yS)
-			xT = ((@wide) ? 0 : int(btnMW / 2) + 2)
-			yT = ((@wide) ? int(btnMH / 2) + 2 : 0)
+			Btn(Btns.get(@solveBtn)).drawBtn(canvas, xT, yT, xS, yS)
+			xT = xT + ((@wide) ? 0 : int(btnMW / 2) + 2)
+			yT = yT + ((@wide) ? int(btnMH / 2) + 2 : 0)
 			Btn(Btns.get(@nextBtn)).drawBtn(canvas, xT, yT, xS, yS)
 		else
+			Btns.visScreen(:entry)
 			Btn(Btns.get(@solverBtn)).drawBtn(canvas, 0, 0, btnMW, btnMH - 5)
 			xT = ((@wide) ? @size + @offset + 5 : 0)
 			yT = ((@wide) ? 0 : @size + @offset + 5)
@@ -121,7 +135,7 @@ class DrawPuzzle < View
 		if ((a > @offset) and (a < (@size + @offset)))
 			cellBtn(x,y)
 		else
-			Btns.buttons().each {|btn:Btn| btn.click(x,y) }
+			Btns.buttons().each {|btn:Btn| btn.click(x,y) if btn.vis() }
 		end
 		invalidate()
 		return true
@@ -142,15 +156,21 @@ class DrawPuzzle < View
 		return ((rw * 9) + cl)
 	end
 	
+	def toast(str:String):void
+		Toast.makeText(@cntxt, str, Toast.LENGTH_SHORT).show()
+	end
+	
 	class Btns
-		def self.init():void
+		def self.init(context:Context):void
+			@@cntxt = context
 			@@btns = Btn[0]
 			@@lbls = String[0]
 		end
 		
-		def self.create(txt:String, act:Click):int
+		def self.create(txt:String, scrn:String, act:Click):int
 			tmp = Btn.new(txt)
 			tmp.setAction(act)
+			tmp.setScreen(scrn)
 			pos = @@btns.length
 			Btns.add(tmp)
 			return pos
@@ -182,10 +202,18 @@ class DrawPuzzle < View
 			end
 			return Btn(out)
 		end
+		
+		def self.visScreen(scrn:String):void
+			@@btns.each do |btn:Btn|
+				btn.setVis(btn.scrTest(scrn))
+			end
+		end
 	end
 	
 	class Btn
 		def initialize(string = ""):void
+			@screen = ""
+			@visibal = false
 			@pnt = Paint.new()
 			@tf = Typeface(Typeface.create("Courier New",Typeface.BOLD))
 			@pnt.setColor(Color.rgb(5, 5, 5))
@@ -206,6 +234,22 @@ class DrawPuzzle < View
 		
 		def setText(string:String):void
 			@str = string
+		end
+		
+		def setVis(visible = true)
+			@visibal = visible
+		end
+		
+		def vis():boolean
+			@visibal
+		end
+		
+		def setScreen(scrn:String):void
+			@screen = scrn
+		end
+		
+		def scrTest(scrn:String):boolean
+			@screen.equals(scrn)
 		end
 		
 		def setBrdrClr(r:int,g:int,b:int):void
@@ -297,8 +341,9 @@ class DrawPuzzle < View
 		end
 		
 		def click(xC:float, yC:float):void
+			return unless @visibal
 			return if (int(@w * @h) == 0)
-			return unless (((xC > @xT) and (xC < (@xT + @w))) and ((yC > @yT) and (yC < (@yT + @h))))
+			return unless (((xC > @xT) and (xC < (@xT + @bw))) and ((yC > @yT) and (yC < (@yT + @bh))))
 			# run lamda
 			@action.onClick()
 		end
@@ -362,10 +407,27 @@ class DrawPuzzle < View
 		end
 		
 		def commit(sm = true):void
-			if sm
-				
-			end
+			@puz = SuPuzzle.new(3) unless sm
+			@puz.setCells(entryArray()) if sm
 			@solveMode = sm
+		end
+		
+		def entryArray():int[]
+			out = int[81]
+			81.times do |i:int|
+				out[i] = @gCells[i].entryVal()
+			end
+			return out
+		end
+		
+		def nextStep():void
+			return unless @solveMode
+			@puz.stepCheck()
+		end
+		
+		def solve():void
+			return unless @solveMode
+			@puz.solve()
 		end
 		
 		def refresh():void
@@ -573,6 +635,10 @@ class DrawPuzzle < View
 		def val():int
 			return @val unless @parent.solveMode()
 			suCell().val()
+		end
+		
+		def entryVal():int
+			@val
 		end
 		
 		def valS():String
