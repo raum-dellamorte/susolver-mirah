@@ -175,7 +175,7 @@ class DrawPuzzle < View
 		end
 		
 		def self.get(str:String):Btn
-			out = Btn(nil)
+			out = Btn.new("")
 			@@btns.each do |btn:Btn|
 				next unless Btn(btn).getText().equals(str)
 				out = Btn(btn)
