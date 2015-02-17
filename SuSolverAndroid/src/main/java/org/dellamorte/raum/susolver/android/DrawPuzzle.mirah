@@ -297,8 +297,8 @@ class DrawPuzzle < View
 		end
 		
 		def click(xC:float, yC:float):void
-			return if ((@bw * @bh) == 0)
-			return unless (((xC > @xT) and (xC < (@xT + @w))) and ((yC > @yT) and (y < (@yT + @h))))
+			return if (int(@w * @h) == 0)
+			return unless (((xC > @xT) and (xC < (@xT + @w))) and ((yC > @yT) and (yC < (@yT + @h))))
 			# run lamda
 			@action.onClick()
 		end
