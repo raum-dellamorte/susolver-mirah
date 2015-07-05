@@ -158,6 +158,14 @@ public class Ops {
 		DualPivotQuicksort.sort(a);
 	}
 	
+	public static boolean inRange(int n, int min, int max) {
+		return (min <= n && n <= max);
+	}
+	
+	public static boolean inArray(int n, int length) {
+		return (0 <= n && n < length);
+	}
+	
 	public static int binarySearch(int[] a, int key) {
 		return binarySearch0(a, 0, a.length, key);
 	}

@@ -31,14 +31,7 @@ class DrawPuzzle < View
 		context.getTheme().resolveAttribute(android::R::attr.actionBarSize, tv, true)
 		@abh = getResources().getDimensionPixelSize(tv.resourceId)
 		@guiPuz = SuGuiPuzzle.newPuzzle()
-		@bg = Rect.new()
-		@bgC = Paint.new()
-		@bgC.setColor(Color.rgb(200, 200, 200))
-		@bgC.setStyle(Paint.Style.FILL)
-		@bgC.setAlpha(255)
-		@curScreen = :entry
 		Btns.init(context)
-		dp = self
 		gp = @guiPuz
 		@solverBtn = Btns.create("Solve Mode", :entry) {
 			#Toast.makeText(context, "Clicked Solve Mode", Toast.LENGTH_SHORT).show()
@@ -46,11 +39,11 @@ class DrawPuzzle < View
 		}
 		@saveBtn = Btns.create("Save", :entry) {
 			#Toast.makeText(context, "Clicked Save", Toast.LENGTH_SHORT).show()
-			
+			gp.save()
 		}
 		@loadBtn = Btns.create("Load", :entry) {
 			#Toast.makeText(context, "Clicked Load", Toast.LENGTH_SHORT).show()
-			
+			gp.load()
 		}
 		@returnBtn = Btns.create("Entry Mode", :solver) {
 			#Toast.makeText(context, "Clicked Entry Mode", Toast.LENGTH_SHORT).show()
@@ -70,24 +63,10 @@ class DrawPuzzle < View
 	def onDraw(canvas:Canvas):void
 		super
 		updateSizeAndOffset()
-		# left, top, right, bottom
-		@bg.set(0, 0, @size, @size)
-		xT = float(0.0 + ((!@wide) ? 0 : @offset))
-		yT = float(0.0 + ((@wide) ? 0 : @offset))
-		canvas.translate(xT,yT)
-		canvas.drawRect(@bg, @bgC)
-		@guiPuz.gen()
-		scl = float(@size) / float(1010)
-		rscl = float(1010) / float(@size)
-		canvas.scale(scl, scl)
-		canvas.drawBitmap(Bitmap(@guiPuz.bitmap()), 5, 5, Paint(nil))
-		canvas.scale(rscl, rscl)
-		canvas.translate(-xT,-yT)
+		xT = float(0 + ((!@wide) ? 0 : @offset))
+		yT = float(0 + ((@wide) ? 0 : @offset))
+		@guiPuz.drawPuz(canvas, xT, yT, @size)
 		drawButtons(canvas)
-	end
-	
-	def setScreen(scrn:String):void
-		@curScreen = scrn
 	end
 	
 	def updateSizeAndOffset():void
@@ -103,26 +82,22 @@ class DrawPuzzle < View
 	def drawButtons(canvas:Canvas):void
 		btnMW = ((@wide) ? @offset : @size)
 		btnMH = ((@wide) ? @size : @offset)
-		xS = ((@wide) ? btnMW - 5 : int(btnMW / 2) - 2)
-		yS = ((@wide) ? int(btnMH / 2) - 2 : btnMH - 5)
+		#xS = ((@wide) ? btnMW - 5 : int(btnMW / 2) - 2)
+		#yS = ((@wide) ? int(btnMH / 2) - 2 : btnMH - 5)
+		xT = ((@wide) ? @size + @offset + 5 : 0)
+		yT = ((@wide) ? 0 : @size + @offset + 5)
+		top = BtnArea.new(0,0,btnMW,btnMH - 5)
+		btm = BtnArea.new(xT,yT,btnMW,btnMH - 5,1)
 		if @guiPuz.solveMode()
 			Btns.visScreen(:solver)
-			Btn(Btns.get(@returnBtn)).drawBtn(canvas, 0, 0, btnMW, btnMH - 5)
-			xT = ((@wide) ? @size + @offset + 5 : 0)
-			yT = ((@wide) ? 0 : @size + @offset + 5)
-			Btn(Btns.get(@solveBtn)).drawBtn(canvas, xT, yT, xS, yS)
-			xT = xT + ((@wide) ? 0 : int(btnMW / 2) + 2)
-			yT = yT + ((@wide) ? int(btnMH / 2) + 2 : 0)
-			Btn(Btns.get(@nextBtn)).drawBtn(canvas, xT, yT, xS, yS)
+			Btn(Btns.get(@returnBtn)).drawBtn(canvas, top)
+			Btn(Btns.get(@solveBtn)).drawBtn(canvas, btm.areas()[0])
+			Btn(Btns.get(@nextBtn)).drawBtn(canvas, btm.areas()[1])
 		else
 			Btns.visScreen(:entry)
-			Btn(Btns.get(@solverBtn)).drawBtn(canvas, 0, 0, btnMW, btnMH - 5)
-			xT = ((@wide) ? @size + @offset + 5 : 0)
-			yT = ((@wide) ? 0 : @size + @offset + 5)
-			Btn(Btns.get(@saveBtn)).drawBtn(canvas, xT, yT, xS, yS)
-			xT = xT + ((@wide) ? 0 : int(btnMW / 2) + 2)
-			yT = yT + ((@wide) ? int(btnMH / 2) + 2 : 0)
-			Btn(Btns.get(@loadBtn)).drawBtn(canvas, xT, yT, xS, yS)
+			Btn(Btns.get(@solverBtn)).drawBtn(canvas, top)
+			Btn(Btns.get(@saveBtn)).drawBtn(canvas, btm.areas()[0])
+			Btn(Btns.get(@loadBtn)).drawBtn(canvas, btm.areas()[1])
 		end
 	end
 	
@@ -133,27 +108,12 @@ class DrawPuzzle < View
 		y = e.getY()
 		a = ((@wide) ? x : y)
 		if ((a > @offset) and (a < (@size + @offset)))
-			cellBtn(x,y)
+			@guiPuz.cellBtn(x,y)
 		else
 			Btns.buttons().each {|btn:Btn| btn.click(x,y) if btn.vis() }
 		end
 		invalidate()
 		return true
-	end
-	
-	def cellBtn(x:float, y:float):void
-		cx = int(x - (5 + ((@wide) ? @offset : 0)))
-		cy = int(y - (5 + ((@wide) ? 0 : @offset)))
-		n = getGCellAt(cx, cy)
-		@guiPuz.cells()[n].nextVal()
-	end
-	
-	def getGCellAt(x:int, y:int):int
-		return -1 if (((x < 0) or (x > (@size - 10))) or ((y < 0) or (y > (@size - 10))))
-		cl = int((float(x) * float(9)) / float(@size - 10))
-		rw = int((float(y) * float(9)) / float(@size - 10))
-		return -1 if (((cl < 0) or (rw < 0)) or ((cl > 8) or (rw > 8)))
-		return ((rw * 9) + cl)
 	end
 	
 	def toast(str:String):void
@@ -208,6 +168,71 @@ class DrawPuzzle < View
 				btn.setVis(btn.scrTest(scrn))
 			end
 		end
+	end
+	
+	class BtnArea
+		def initialize(xTran:int, yTran:int, width:int, height:int, divide = 0, vertical = false):void
+			@xT = xTran
+			@yT = yTran
+			@w = width
+			@h = height
+			@vert = vertical
+			setDiv(divide)
+		end
+		
+		def xTran():int
+			@xT
+		end
+		
+		def yTran():int
+			@yT
+		end
+		
+		def width():int
+			@w
+		end
+		
+		def height():int
+			@h
+		end
+		
+		def isVertical():boolean
+			@vert
+		end
+		
+		def isHorizontal():boolean
+			!@vert
+		end
+		
+		def setDiv(divide:int):void
+			@div = ((divide < 0) ? 0 : divide)
+			genChilds()
+		end
+		
+		def div():int
+			@div
+		end
+		
+		def genChilds():void
+			return if (@div < 1)
+			d = @div + 1
+			@childs = BtnArea[d]
+			nW = ( (@vert) ? @w : int(float(@w) / d) )
+			nH = ( (!@vert) ? @h : int(float(@h) / d) )
+			d.times do |i:int|
+				xTr = @xT + ( (@vert) ? (-2) : (i * (nW)) )
+				yTr = @yT + ( (!@vert) ? (-2) : (i * (nH)) )
+				@childs[i] = BtnArea.new(xTr + 2, yTr + 2, nW - 4, nH - 4)
+			end
+		end
+		
+		def areas():BtnArea[]
+			return @childs if (@div > 0)
+			out = BtnArea[1]
+			out[0] = self
+			return out
+		end
+		
 	end
 	
 	class Btn
@@ -292,9 +317,17 @@ class DrawPuzzle < View
 			int((float(@bh) / float(2)) + (float(@h) / float(2)))
 		end
 		
+		def tmpStr(str:String)
+			ts = StringBuilder.new()
+			int(str.length()).times do |i:int|
+				ts.append("A")
+			end
+			ts.toString()
+		end
+		
 		def textBounds():Rect
 			out = Rect.new()
-			@pnt.getTextBounds(@str, 0, @str.length(), out)
+			@pnt.getTextBounds(tmpStr(@str), 0, @str.length(), out)
 			out
 		end
 		
@@ -335,6 +368,10 @@ class DrawPuzzle < View
 			canvas.translate(-@xT,-@yT)
 		end
 		
+		def drawBtn(canvas:Canvas, area:BtnArea):void
+			drawBtn(canvas, area.xTran(), area.yTran(), area.width(), area.height())
+		end
+		
 		def setAction(act:Click):void
 			# store lamda
 			@action = act
@@ -349,201 +386,7 @@ class DrawPuzzle < View
 		end
 	end
 	
-	class SuGuiPuzzle < Canvas
-		@@r = Rect.new()
-		@@pBG = Paint.new()   # Background
-		
-		def self.init():void
-			return unless @@r.isEmpty()
-			@@r.set(0,0,1000,1000)
-			@@pBG.setColor(Color.rgb(0, 0, 0))
-			@@pBG.setStyle(Paint.Style.FILL)
-			@@pBG.setAlpha(255)
-		end
-		
-		def self.newPuzzle():SuGuiPuzzle
-			SuGuiPuzzle.init()
-			out = SuGuiPuzzle.new()
-			return out
-		end
-		
-		def initialize():void
-			super
-			@puz = SuPuzzle.new(3)
-			@solveMode = false
-			@gCells = SuGuiCell[81]
-			@boxS = SuGuiBlock[9]
-			3.times do |brw:int|
-				3.times do |bcl:int|
-					#bsz = int(@size / 3) - 12
-					bx = SuGuiBlock.newBlock(self)
-					@boxS[((brw * 3) + bcl)] = bx
-					3.times do |crw:int|
-						3.times do |ccl:int|
-							loc = ((((brw * 27) + (crw * 9)) + (bcl * 3)) + ccl)
-							#csz = (bsz / 3)
-							##(csz -= 6) if (csz > 15)
-							cel = SuGuiCell.newCell(self, loc)
-							@gCells[loc] = cel
-							bx.addLoc(crw,ccl,loc)
-						end
-					end
-				end
-			end
-			
-		end
-		
-		def solveMode():boolean
-			@solveMode
-		end
-		
-		def puzzle():SuPuzzle
-			@puz
-		end
-		
-		def suCell(i:int):SuCell
-			return @puz.cells()[i] if ((i >= 0) and (i < 81))
-			return SuCell(nil)
-		end
-		
-		def commit(sm = true):void
-			@puz = SuPuzzle.new(3) unless sm
-			@puz.setCells(entryArray()) if sm
-			@solveMode = sm
-		end
-		
-		def entryArray():int[]
-			out = int[81]
-			81.times do |i:int|
-				out[i] = @gCells[i].entryVal()
-			end
-			return out
-		end
-		
-		def nextStep():void
-			return unless @solveMode
-			@puz.stepCheck()
-		end
-		
-		def solve():void
-			return unless @solveMode
-			@puz.solve()
-		end
-		
-		def refresh():void
-			@bitmap = Bitmap.createBitmap(1000, 1000, Bitmap.Config.ARGB_8888)
-			#@bitmap.setHasAlpha(false)
-			setBitmap(@bitmap)
-			drawRect(@@r, @@pBG)
-		end
-		
-		def bitmap():Bitmap
-			@bitmap
-		end
-		
-		def cells():SuGuiCell[]
-			@gCells
-		end
-		
-		def gen():void
-			refresh()
-			translate(5,5)
-			3.times do |rw|
-				3.times do |cl|
-					x = cl * 330
-					y = rw * 330
-					bx = @boxS[((rw * 3) + cl)]
-					bx.gen()
-					drawBitmap(Bitmap(bx.bitmap()), x, y, Paint.new().setAlpha(255))
-				end
-			end
-			translate(-5,-5)
-		end
-		
-		def cellCanBe(cel:int, n:int):boolean
-			return true if n == 0
-			out = true
-			tc = @gCells[cel]
-			81.times do |i:int|
-				next unless out
-				next if cel == i
-				c = @gCells[i]
-				next unless (((c.box() == tc.box()) or (c.row() == tc.row())) or (c.col() == tc.col()))
-				next if c.val() == 0
-				next if c.val() != n
-				out = false
-			end
-			out
-		end
-		
-		
-	end
-	
-	class SuGuiBlock < Canvas
-		@@r = Rect.new()
-		@@pBG = Paint.new()   # Background
-		
-		def self.init():void
-			return unless @@r.isEmpty()
-			@@r.set(0,0,330,330)
-			@@pBG.setColor(Color.rgb(0, 0, 0))
-			@@pBG.setStyle(Paint.Style.FILL)
-		end
-		
-		def self.newBlock(prnt:SuGuiPuzzle):SuGuiBlock
-			SuGuiBlock.init()
-			out = SuGuiBlock.new()
-			out.setParent(prnt)
-			return out
-		end
-		
-		def initialize():void
-			super
-			@cels = int[9]
-		end
-		
-		def setParent(prnt:SuGuiPuzzle):void
-			@parent = prnt
-		end
-		
-		def refresh():void
-			@bitmap = Bitmap.createBitmap(330, 330, Bitmap.Config.ARGB_8888)
-			#@bitmap.setHasAlpha(false)
-			setBitmap(@bitmap)
-			drawRect(@@r, @@pBG)
-			save()
-		end
-		
-		def bitmap():Bitmap
-			@bitmap
-		end
-		
-		def addLoc(rw:int, cl:int, loc:int):void
-			return unless (((rw >= 0) and (rw < 3)) and ((cl >= 0) and (cl < 3)))
-			iloc = ((rw * 3) + cl)
-			@cels[iloc] = loc
-		end
-		
-		def gen():void
-			refresh()
-			translate(3,3)
-			Ops.sort(@cels)
-			3.times do |rw|
-				3.times do |cl|
-					x = (cl * 108)
-					y = (rw * 108)
-					icel = @cels[((rw * 3) + cl)]
-					cel = @parent.cells()[icel]
-					cel.gen()
-					drawBitmap(Bitmap(cel.bitmap()), x, y, Paint.new().setAlpha(255))
-				end
-			end
-			translate(-3,-3)
-		end
-		
-	end
-	
-	class SuGuiCell < Canvas
+	class SuGuiCell
 		@@r = Rect.new()
 		@@pBrdr = Paint.new() # Border
 		@@pBG = Paint.new()   # Background
@@ -597,6 +440,36 @@ class DrawPuzzle < View
 			@box = 0
 			@row = 0
 			@col = 0
+		end
+		
+		def drawCell(c:Canvas, xTran:float, yTran:float, scl:float):void
+			sclFrom = 104 # 108
+			c.translate(xTran,yTran)
+			@@r.set(0 + int(8 * scl),0 + int(8 * scl),int(sclFrom * scl),int(sclFrom * scl))
+			@@pPncl.setTextSize(int(33 * scl))
+			@@pClue.setTextSize(int(98 * scl))
+			@@pSlvd.setTextSize(int(98 * scl))
+			c.drawRect(@@r, ((@hl) ? @@pBGH : @@pBG))
+			#c.drawRect(@@r, @@pBrdr)
+			@hl = false
+			c.translate(10 * scl,33 * scl)
+			if (isClue() or suCell().isSet())
+				p = ((isClue()) ? @@pClue : @@pSlvd)
+				c.drawText(valS(), int(18 * scl), int(58 * scl), p)
+			else
+				3.times do |rw|
+					3.times do |cl|
+						x = int((cl * 33) * scl)
+						y = int((rw * 33) * scl)
+						num = 1 + ((rw * 3) + cl)
+						if suCell().canbeBool(num)
+							# draw num
+							c.drawText("" + num, x + 1, y + 1, @@pPncl)
+						end
+					end
+				end
+			end
+			c.translate(-(xTran + (10 * scl)),-(yTran + (33 * scl)))
 		end
 		
 		def setParent(prnt:SuGuiPuzzle):void
@@ -676,47 +549,221 @@ class DrawPuzzle < View
 			@box = (((@brow - 1) * 3) + @bcol)
 		end
 		
-		def refresh():void
-			@bitmap = Bitmap.createBitmap(108, 108, Bitmap.Config.ARGB_8888)
-			#@bitmap.setHasAlpha(false)
-			setBitmap(@bitmap)
-			drawRect(@@r, ((@hl) ? @@pBGH : @@pBG))
-			drawRect(@@r, @@pBrdr)
-			@hl = false
+		def setHighlight(highlight:boolean):void
+			@hl = highlight
+		end
+	end
+	
+	class SuGuiBlock
+		@@r = Rect.new()
+		@@pBG = Paint.new()   # Background
+		
+		def self.init():void
+			return unless @@r.isEmpty()
+			@@pBG.setColor(Color.rgb(0, 0, 0))
+			@@pBG.setStyle(Paint.Style.FILL)
 		end
 		
-		def bitmap():Bitmap
-			@bitmap
+		def self.newBlock(prnt:SuGuiPuzzle):SuGuiBlock
+			SuGuiBlock.init()
+			out = SuGuiBlock.new()
+			out.setParent(prnt)
+			return out
 		end
 		
-		def gen():void
-			refresh()
-			translate(10,33)
-			# define cel
-			if (isClue() or suCell().isSet())
-				p = ((isClue()) ? @@pClue : @@pSlvd)
-				#num = val()
-				#txt = ((num == 0) ? "" : "" + num)
-				drawText(valS(), 18, 54, p)
-			else
-				3.times do |rw|
-					3.times do |cl|
-						x = cl * 33
-						y = rw * 33
-						num = 1 + ((rw * 3) + cl)
-						if suCell().canbeBool(num)
-							# draw num
-							drawText("" + num, x, y, @@pPncl)
+		def initialize():void
+			super
+			@cels = int[9]
+		end
+		
+		def drawBlock(c:Canvas, xTran:float, yTran:float, scl:float):void
+			c.translate(xTran,yTran)
+			@@r.set(0,0,int(324 * scl),int(324 * scl))
+			c.drawRect(@@r, @@pBG)
+			brdrsz = int(3 * scl)
+			clsz = int(99 * scl)
+			clspace = int((108 * scl) - clsz)
+			c.translate(brdrsz,brdrsz)
+			Ops.sort(@cels)
+			3.times do |rw|
+				3.times do |cl|
+					x = (cl * clsz) + (cl * clspace)
+					y = (rw * clsz) + (rw * clspace)
+					icel = @cels[((rw * 3) + cl)]
+					cel = @parent.cells()[icel]
+					cel.drawCell(c, float(x), float(y), float(scl))
+				end
+			end
+			c.translate(-(xTran + brdrsz),-(yTran + brdrsz))
+		end
+		
+		def setParent(prnt:SuGuiPuzzle):void
+			@parent = prnt
+		end
+		
+		def addLoc(rw:int, cl:int, loc:int):void
+			return unless (((rw >= 0) and (rw < 3)) and ((cl >= 0) and (cl < 3)))
+			iloc = ((rw * 3) + cl)
+			@cels[iloc] = loc
+		end
+		
+	end
+	
+	class SuGuiPuzzle
+		def self.init():void
+			# Class setup here
+		end
+		
+		def self.newPuzzle():SuGuiPuzzle
+			SuGuiPuzzle.init()
+			out = SuGuiPuzzle.new()
+			# Object setup here
+			return out
+		end
+		
+		def initialize():void
+			super
+			@bg = Rect.new()
+			@bgC = Paint.new()
+			@bgC.setColor(Color.rgb(200, 200, 200))
+			@bgC.setStyle(Paint.Style.FILL)
+			@bgC.setAlpha(255)
+			@puz = SuPuzzle.new(3)
+			@solveMode = false
+			@gCells = SuGuiCell[81]
+			@boxS = SuGuiBlock[9]
+			3.times do |brw:int|
+				3.times do |bcl:int|
+					#bsz = int(@size / 3) - 12
+					bx = SuGuiBlock.newBlock(self)
+					@boxS[((brw * 3) + bcl)] = bx
+					3.times do |crw:int|
+						3.times do |ccl:int|
+							loc = ((((brw * 27) + (crw * 9)) + (bcl * 3)) + ccl)
+							#csz = (bsz / 3)
+							##(csz -= 6) if (csz > 15)
+							cel = SuGuiCell.newCell(self, loc)
+							@gCells[loc] = cel
+							bx.addLoc(crw,ccl,loc)
 						end
 					end
 				end
 			end
-			translate(-10,-33)
+			
 		end
 		
-		def setHighlight(highlight:boolean):void
-			@hl = highlight
+		def drawPuz(c:Canvas, xTran:float, yTran:float, syze:int):void
+			@xT = xTran
+			@yT = yTran
+			@sz = syze
+			c.translate(@xT,@yT)
+			# left, top, right, bottom
+			@bg.set(0, 0, @sz, @sz)
+			c.drawRect(@bg, @bgC)
+			c.translate(5,5)
+			scl = float(float(@sz) / float(1010))
+			rscl = float(float(1) / scl)  # float(1010) / float(@sz)
+			#c.scale(scl, scl)
+			bxsz = int(330 * scl)
+			3.times do |rw|
+				3.times do |cl|
+					x = (cl * bxsz)
+					y = (rw * bxsz)
+					bx = @boxS[((rw * 3) + cl)]
+					bx.drawBlock(c, float(x), float(y), scl)
+				end
+			end
+			#c.scale(rscl, rscl)
+			c.translate(-(@xT + 5),-(@yT + 5))
 		end
+		
+		def solveMode():boolean
+			@solveMode
+		end
+		
+		def puzzle():SuPuzzle
+			@puz
+		end
+		
+		def suCell(i:int):SuCell
+			return @puz.cells()[i] if Ops.inArray(i, 81)
+			return SuCell(nil)
+		end
+		
+		def commit(sm = true):void
+			@puz = SuPuzzle.new(3) unless sm
+			@puz.setCells(entryArray()) if sm
+			@solveMode = sm
+		end
+		
+		def entryArray():int[]
+			out = int[81]
+			81.times do |i:int|
+				out[i] = @gCells[i].entryVal()
+			end
+			return out
+		end
+		
+		def nextStep():void
+			return unless @solveMode
+			@puz.stepCheck()
+		end
+		
+		def solve():void
+			return unless @solveMode
+			@puz.solve()
+		end
+		
+		def save():void
+			return if @solveMode
+			
+		end
+		
+		def load():void
+			return if @solveMode
+			
+		end
+		
+		def cells():SuGuiCell[]
+			@gCells
+		end
+		
+		def validCell(n:int):boolean
+			return Ops.inArray(n, 81)
+		end
+		
+		def cellCanBe(cel:int, n:int):boolean
+			return true if n == 0
+			out = true
+			tc = @gCells[cel]
+			81.times do |i:int|
+				next unless out
+				next if cel == i
+				c = @gCells[i]
+				next unless (((c.box() == tc.box()) or (c.row() == tc.row())) or (c.col() == tc.col()))
+				next if c.val() == 0
+				next if c.val() != n
+				out = false
+			end
+			out
+		end
+		
+		def cellBtn(x:float, y:float):void
+			cx = int(x - (@xT + float(5)))
+			cy = int(y - (@yT + float(5)))
+			n = getGCellAt(cx, cy)
+			@gCells[n].nextVal() if validCell(n)
+		end
+		
+		def getGCellAt(x:int, y:int):int
+			return -1 if (((x < 0) or (x > (@sz - 10))) or ((y < 0) or (y > (@sz - 10))))
+			cl = int((float(x) * float(9)) / float(@sz - 10))
+			rw = int((float(y) * float(9)) / float(@sz - 10))
+			return -1 if (((cl < 0) or (rw < 0)) or ((cl > 8) or (rw > 8)))
+			return ((rw * 9) + cl)
+		end
+		
+		
 	end
 	
 end
