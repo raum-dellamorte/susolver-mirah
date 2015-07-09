@@ -326,8 +326,9 @@ class SuPuzzle
 			next unless na.length == 1
 			c.set(na[0])
 			msg = msg + "\n " + na[0] + " at " + c.brc_s()
+			break
 		end
-		puts msg if !msg.equals("Single Candidates: ")
+		puts msg if !msg.equals("Single Candidate: ")
 	end
 	
 	def hiddenSingle():void
@@ -924,7 +925,7 @@ class SuPuzzle
 		def initialize(parent:SuPuzzle):void
 			@parent = parent
 			@size = @parent.size()
-			@is = 0
+			@is  = 0
 			@box = 0
 			@row = 0
 			@col = 0
